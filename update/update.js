@@ -11,7 +11,7 @@
  * @returns 
  */
 async function fetchStations(longitude, latitude) {
-    let response = await fetch(`https://api.prix-carburants.2aaz.fr/stations/around/${longitude},${latitude}?responseFields=Fuels`, {
+    let response = await fetch(`https://api.prix-carburants.2aaz.fr/stations/around/${longitude},${latitude}?responseFields=FuelsPrices`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
