@@ -3,9 +3,9 @@
  */
 
 const express = require ('express');
-const test = require('../routes/test');
+const temp = require('../routes/temp');
 
 module.exports = function(app) {
     app.use(express.json());        // -> piece of middleware need to allow to pass data into request body (needed for POST and PUT requests)
-    app.use('/api/test', test);     // -> links api endpoint '/api/test' to module defined in 'test.js'
+    app.use('/api/temp', temp);     // -> links api endpoint '/api/temp' to module defined in 'temp.js'
 };
