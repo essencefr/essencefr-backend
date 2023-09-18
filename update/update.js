@@ -28,7 +28,7 @@ async function fetchStations(longitude, latitude) {
  * Save given station data into the db
  * @param {Station} stationData     Station data formated such as defined in models 
  */
-async function saveStations(stationData){
+async function saveStation(stationData){
     const newDoc = new Station({
         stationId: stationData.id,
         name: stationData.name,
@@ -59,3 +59,5 @@ async function saveStations(stationData){
     // send the newly created object:
     res.send(newDoc);
 }
+
+module.exports.saveStation = saveStation;
