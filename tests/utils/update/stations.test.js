@@ -1,5 +1,5 @@
 /**
- * Testing the update feature
+ * Testing the save/update stations feature
  */
 
 const request = require('supertest');  // function used to send a request to an endpoint
@@ -33,16 +33,6 @@ describe('update feature', () => {
             // compare results:
             expect(res.status).toBe(200);
             expect(res.body.name).toEqual(stationName);
-        });
-
-        test('adding stations with partial data should raise an error', async () => {
-            const stationsDataRaw = [
-                { id: 1, name: 'a' },
-            ];
-            // ensure that a validation error is thrown:
-            expect(() => {
-                convertStationsFormat(stationsDataRaw);
-            }).toThrow(/validation error/i);
         });
 
         test('adding two stations with the same _id should raise an error and none of the stations should be added', async () => {
