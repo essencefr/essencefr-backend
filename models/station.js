@@ -12,7 +12,10 @@ const Station = mongoose.model('Station', new mongoose.Schema({
         type: Number,
         required: true
     },
-    name: String,
+    name: {
+        type: String,
+        required: true
+    },
     brand: {
         id: Number,
         name: String
@@ -62,7 +65,14 @@ function validateStationRaw(jsonData) {
         Fuels: Joi.array().required().items(
             Joi.object().required().keys({
                 id: Joi.number().required(),
-                name: Joi.string().required()
+                name: Joi.string().required(),
+                available: Joi.boolean().required(),
+                Update: Joi.object().required().keys({
+                    value: Joi.date().required()
+                }),
+                Price: Joi.object().required().keys({
+                    value: Joi.number().required()
+                }),
             })
         ).sparse()  // allows undefined values inside the array
     });
