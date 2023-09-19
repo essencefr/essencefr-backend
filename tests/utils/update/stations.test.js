@@ -12,7 +12,7 @@ const { convertStationsFormat } = require('../../../utils/convert');
 let server = null;
 
 // main test suite:
-describe('update feature', () => {
+describe('save/update station feature', () => {
     beforeEach(() => { server = require('../../../index'); });
     afterEach( async () => {
         server.close();
@@ -20,8 +20,8 @@ describe('update feature', () => {
     });
     afterAll(() => { mongoose.disconnect(); });
 
-    describe('adding station data into database', () => {
-        test('data should be avaiable after being added', async () => {
+    describe('saving station data into database', () => {
+        test('data should be avaiable after being saved into the DB', async () => {
             // get the raw data object elements:
             const stationId = stationsDataRaw[0].id;
             const stationName = stationsDataRaw[0].name;
@@ -35,7 +35,7 @@ describe('update feature', () => {
             expect(res.body.name).toEqual(stationName);
         });
 
-        test('adding two stations with the same _id should raise an error and none of the stations should be added', async () => {
+        test('saving two stations with the same _id should raise an error and none of the stations should be save into the DB', async () => {
             stationsDataRaw.push(stationsDataRaw[0]);
             const stationsData = convertStationsFormat(stationsDataRaw);
             await expect(saveStations(stationsData)).rejects.toThrow(/duplicate key error/i);

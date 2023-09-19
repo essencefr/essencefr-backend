@@ -5,7 +5,7 @@
 const { convertStationsFormat } = require('../../../utils/convert');
 
 
-describe('update feature', () => {
+describe('generic update feature', () => {
     test('processing raw data with missing fields should raise an error', () => {
         const stationsDataRaw = [
             { id: 1, name: 'a' },
