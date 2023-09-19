@@ -7,27 +7,45 @@ const mongoose = require('mongoose');
 /***** Genreric varaibles/const *****/
 
 const History = mongoose.model({ collection: 'histories' }, new mongoose.Schema({
-    stationId: {
-        type: Number,
+    station: {
+        type: {
+            id : {
+                type: Number,
+                required: true
+            },
+            name: {
+                type: String,
+                required: true
+            }
+        },
         required: true
     },
-    stationName: {
-        type: String,
-        required: true
-    },
-    fuelId: {
-        type: Number,
-        required: true
-    },
-    fuelShortName: {
-        type: String,
+    fuel: {
+        type: {
+            id : {
+                type: Number,
+                required: true
+            },
+            shortName: {
+                type: String,
+                required: true
+            }
+        },
         required: true
     },
     history: {
         type: [{
-            date: Date,
-            price: Number,
+            date: {
+                type: Date,
+                required: true
+            },
+            price: {
+                type: Number,
+                required: true
+            },
         }],
         default: []
     }
 }));
+
+module.exports.History = History;
