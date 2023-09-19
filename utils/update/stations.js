@@ -3,7 +3,7 @@
  */
 
 const mongoose = require('mongoose');
-const { Station, validateStationRaw } = require("../models/station");
+const { Station, validateStationRaw } = require("../../models/station");
 
 /**
  * Function that retrieves the stations and gas prices 10km around a given location.
