@@ -2,6 +2,7 @@
  * Code called to update values in the database
  */
 
+const mongoose = require('mongoose');
 const { Station, validateStationRaw } = require("../models/station");
 
 /**
@@ -34,9 +35,19 @@ async function saveStations(stationsDataRaw){
     stationsDataRaw.forEach(element => {
         stationsData.push(convertFormat(element));
     });
-    // save the data:
-    // TODO: perform this operation within a transaction so that no data will be stored if an _id already exists
-    await Station.collection.insertMany(stationsData);
+    // save the data within a transaction so that no data will be stored if an _id already exists:
+    // TODO: Improvement - use a wrapper for transactions. More details here: https://blog.tericcabrel.com/how-to-use-mongodb-transaction-in-node-js/
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        await Station.collection.insertMany(stationsData, { session });
+        await session.commitTransaction();  // commit transaction
+    } catch (e) {
+        await session.abortTransaction();
+        throw Error(e);
+    } finally {
+        session.endSession();
+    }
 };
 
 /**
