@@ -100,7 +100,7 @@ Here's my data format for storing a station details:
 
 ```json
 {
-    "stationId": 33700009,
+    "_id": 33700009,
     "brand": {
         "id": 29,
         "name": "Casino"
@@ -145,9 +145,15 @@ Here's my data format for storing fuels prices history:
 
 ```json
 {
-    "stationId": 33700009,
-    "fuelId": 1,
-    "fuelShortName": "Gazole",
+    "_id": ObjectId('xxx'),  // automatically added by mongoose
+    "station": {
+        "id": 33700009,
+        "name": "CASINO SUPERMARCHE"
+    },
+    "fuel": {
+        "id": 1,
+        "shortName": "Gazole"
+    },
     "history": [  // basically a 2D array that stores a price with its date everytime a price change has been detected
         {
             "date": "2023-08-18T07:26:15Z",  // should be DATE type in db
@@ -162,6 +168,7 @@ Here's my data format for storing fuels prices history:
 }
 // Separated histories based on 'stationId' and 'fuelId' for faster data filtering (filter applied within db queries, at data level)
 {
+    "_id": ObjectId('yyy'),
     "stationId": 33700009,
     "fuelId": 5,
     "fuelShortName": "SP95-E10",
