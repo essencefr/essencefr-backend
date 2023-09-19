@@ -240,140 +240,140 @@ Here's my data format for storing generic brands details:
 
 ```json
 {
-    "id": 1,
+    "_id": 1,
     "name": "TotalEnergies",
     "shortName": "total",
     "nbStations": 1611
 }
 
 {
-    "id": 66,
+    "_id": 66,
     "name": "Intermarché",
     "shortName": "intermarche",
     "nbStations": 1455
 }
 
 {
-    "id": 136,
+    "_id": 136,
     "name": "Système U",
     "shortName": "systemeu",
     "nbStations": 867
 }
 
 {
-    "id": 28,
+    "_id": 28,
     "name": "Carrefour Market",
     "shortName": "carrefourmarket",
     "nbStations": 723
 }
 
 {
-    "id": 42,
+    "_id": 42,
     "name": "E.Leclerc",
     "shortName": "eleclerc",
     "nbStations": 709
 }
 
 {
-    "id": 2,
+    "_id": 2,
     "name": "TotalEnergies Access",
     "shortName": "totalaccess",
     "nbStations": 700
 }
 
 {
-    "id": 12,
+    "_id": 12,
     "name": "Avia",
     "shortName": "avia",
     "nbStations": 588
 }
 
 {
-    "id": 26,
+    "_id": 26,
     "name": "Carrefour Contact",
     "shortName": "carrefourcontact",
     "nbStations": 383
 }
 
 {
-    "id": 49,
+    "_id": 49,
     "name": "Esso Express",
     "shortName": "essoexpress",
     "nbStations": 322
 }
 
 {
-    "id": 17,
+    "_id": 17,
     "name": "BP",
     "shortName": "bp",
     "nbStations": 255
 }
 
 {
-    "id": 25,
+    "_id": 25,
     "name": "Carrefour",
     "shortName": "carrefour",
     "nbStations": 223
 }
 
 {
-    "id": 7,
+    "_id": 7,
     "name": "Auchan",
     "shortName": "auchan",
     "nbStations": 219
 }
 
 {
-    "id": 48,
+    "_id": 48,
     "name": "Esso",
     "shortName": "esso",
     "nbStations": 208
 }
 
 {
-    "id": 29,
+    "_id": 29,
     "name": "Casino",
     "shortName": "casino",
     "nbStations": 172
 }
 
 {
-    "id": 46,
+    "_id": 46,
     "name": "ENI",
     "shortName": "eni",
     "nbStations": 155
 }
 
 {
-    "id": 44,
+    "_id": 44,
     "name": "Elan",
     "shortName": "elan",
     "nbStations": 125
 }
 
 {
-    "id": 134,
+    "_id": 134,
     "name": "Intermarché Contact",
     "shortName": "intercontact",
     "nbStations": 125
 }
 
 {
-    "id": 41,
+    "_id": 41,
     "name": "Dyneff",
     "shortName": "dyneff",
     "nbStations": 88
 }
 
 {
-    "id": 98,
+    "_id": 98,
     "name": "Shell",
     "shortName": "shell",
     "nbStations": 84
 }
 
 {
-    "id": 81,
+    "_id": 81,
     "name": "Netto",
     "shortName": "netto",
     "nbStations": 79
