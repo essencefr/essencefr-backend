@@ -6,27 +6,7 @@ const mongoose = require('mongoose');
 const { Station, validateStationRaw } = require("../../models/station");
 
 /**
- * Function that retrieves the stations and gas prices 10km around a given location.
- * Calls API from https://swagger.2aaz.fr/
- * Data issues from https://www.prix-carburants.gouv.fr/rubrique/opendata/
- * @param {Number} longitude 
- * @param {Number} latitude 
- * @returns list of stations data in JSON format such as defined bu the government API
- */
-async function fetchStations(longitude, latitude) {
-    let response = await fetch(`https://api.prix-carburants.2aaz.fr/stations/around/${longitude},${latitude}?responseFields=FuelsPrices`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Range": "m=0-9999"  // distance around the point (max 10000 (10km))
-        }
-    });
-    let data = await response.json();
-    return data;
-};
-
-/**
- * Save given stations data into the db. If a station has an _id that already exists in the db, no modification is made.
+ * Save given stations data into the db. If a station has an _id that already exists in the db, no station is added at all.
  * @param stationsDataRaw   list of stations data in JSON format such as defined bu the government API
  */
 async function saveStations(stationsDataRaw){
