@@ -22,7 +22,7 @@ async function saveStations(stationsData){
         await session.abortTransaction();
         throw Error(e);
     } finally {
-        session.endSession();
+        await session.endSession();
     }
 };
 
