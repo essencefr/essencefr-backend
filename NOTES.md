@@ -120,7 +120,8 @@ Here's my data format for storing a station details:
             "shortName": "Gazole",
             "date": "2023-09-18T07:26:15Z",     // timestamp of last known price/avaiability update
             "available": true,                  // 'false' if there is a rupture
-            "price": 1.989
+            "price": 1.989,                     // last known price value
+            "historyId": ObjectId('xxx')        // reference id to the history document
         },
         {
             "id": 5,
@@ -128,6 +129,7 @@ Here's my data format for storing a station details:
             "date": "2023-09-18T07:26:16Z",
             "available": true,
             "price": 1.969,
+            "historyId": ObjectId('xxx')
         },
         {
             "id": 6,
@@ -135,6 +137,7 @@ Here's my data format for storing a station details:
             "date": "2023-09-18T07:26:16Z",
             "available": true,
             "price": 2.019,
+            "historyId": ObjectId('xxx')
         }
     ]
 }
@@ -143,11 +146,13 @@ Here's my data format for storing a station details:
 ## History
 Here's my data format for storing fuels prices history:
 
+Histories are separated based on `stationId` and `fuelId` for faster data filtering (filter applied within db queries, at data level)
+
 ```json
 {
     "_id": ObjectId('xxx'),  // automatically added by mongoose
     "station": {
-        "id": 33700009,
+        "id": 33700009,     // reference id to the station document
         "name": "CASINO SUPERMARCHE"
     },
     "fuel": {
@@ -162,24 +167,6 @@ Here's my data format for storing fuels prices history:
         {
             "date": "2023-09-18T07:26:15Z",
             "price": 1.989
-        },
-        ...
-    ]
-}
-// Separated histories based on 'stationId' and 'fuelId' for faster data filtering (filter applied within db queries, at data level)
-{
-    "_id": ObjectId('yyy'),
-    "stationId": 33700009,
-    "fuelId": 5,
-    "fuelShortName": "SP95-E10",
-    "history": [
-        {
-            "date": "2023-08-18T14:46:15Z",
-            "price": 1.984
-        },
-        {
-            "date": "2023-09-18T07:26:15Z",
-            "price": 1.969
         },
         ...
     ]
