@@ -36,6 +36,7 @@ function convertStationFormat(stationDataRaw) {
             date: new Date(element.Update.value),
             available: element.available,
             price: element.Price.value,
+            // historyId: xxx,  // TODO: should be a reference to the matching history document
         });
     });
     return stationData;

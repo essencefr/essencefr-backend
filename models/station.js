@@ -8,34 +8,28 @@ const Joi = require('joi');
 /***** Genreric varaibles/const *****/
 
 const Station = mongoose.model('Station', new mongoose.Schema({
-    _id: {
-        type: Number,
-        required: true
-    },
-    name: {
-        type: String,
-        required: true
-    },
+    _id: { type: Number, required: true },
+    name: { type: String, required: true },
     brand: {
-        id: Number,
-        name: String
+        id: { type: Number, required: true },
+        name: { type: String, required: true }
     },
     address: {
-        streetLine: String,
-        cityLine: String
+        streetLine: { type: String, required: true },
+        cityLine: { type: String, required: true }
     },
     coordinates: {
-        latitude: Number,
-        longitude: Number
+        latitude: {type: Number, required: true },
+        longitude: { type: Number, required: true }
     },
     fuels: {
         type: [{
-            id: Number,
-            shortName: String,
-            date: Date,
-            available: Boolean,
-            price: Number,
-            historyId: mongoose.Types.ObjectId,
+            id: { type: Number, required: true },
+            shortName: { type: String, required: true },
+            date: { type: Date, required: true },
+            available: { type: Boolean, required: true },
+            price: { type: Number, required: true },
+            historyId: { type: mongoose.Types.ObjectId, required: true },
         }],
         default: []
     }
