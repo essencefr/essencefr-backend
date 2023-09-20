@@ -35,6 +35,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
             date: Date,
             available: Boolean,
             price: Number,
+            historyId: mongoose.Types.ObjectId,
         }],
         default: []
     }
