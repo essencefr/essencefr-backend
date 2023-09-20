@@ -16,6 +16,9 @@
     "url": "https://github.com/essencefr/essencefr-backend/issues"
   },
   "homepage": "https://github.com/essencefr/essencefr-backend#readme",
+  "engines": {
+    "node": "^19.8.1"
+  },
   "dependencies": {
     "compression": "^1.7.4",
     "config": "^3.3.9",
