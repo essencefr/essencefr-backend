@@ -30,7 +30,7 @@ function processRawData(stationsDataRaw) {
 /**
  * Separate a single array of stationData in two arrays:
  *  - one containing the data related to stations unknown in the DB
- *  - one containing the data related to stations already known in the DB
+ *  - one containing the data related to stations already known in the DB  // TODO: make it be an array containing only the stations objects that have new values (compare hash)
  * @param {*} stationsData
  */
 async function filterStationsData(stationsData) {
@@ -40,7 +40,7 @@ async function filterStationsData(stationsData) {
         listInputStationIds.push(stationObject._id);
     });
     // look for the stations already in the database:
-    const listKnownStationIds = await Station.find({ '_id': {$in: listInputStationIds}}).select('_id');
+    const listKnownStationIds = await Station.find({ '_id': {$in: listInputStationIds}}).select('_id');  // TODO Improvment idea: this list can be stored in cache and only actualized when new station documents are created in order to improve performance
     // create output:
     let stationsDataFiltered = {
         stationsDataNew: [],    // stations object with _id unknown in the DB
