@@ -35,8 +35,7 @@ function convertStationFormat(stationDataRaw) {
             shortName: element.short_name,
             date: new Date(element.Update.value),
             available: element.available,
-            price: element.Price.value,
-            // historyId: xxx,  // TODO: should be a reference to the matching history document
+            price: element.Price.value
         });
     });
     return stationData;

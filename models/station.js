@@ -28,8 +28,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
             shortName: { type: String, required: true },
             date: { type: Date, required: true },
             available: { type: Boolean, required: true },
-            price: { type: Number, required: true },
-            historyId: { type: mongoose.Types.ObjectId, required: true },
+            price: { type: Number, required: true }
         }],
         default: []
     }
