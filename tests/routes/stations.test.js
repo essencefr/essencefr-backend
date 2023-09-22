@@ -5,7 +5,7 @@
 const request = require('supertest');  // function used to send a request to an endpoint
 const mongoose = require('mongoose');
 const { Station } = require('../../models/station');
-const { stationsDataRaw } = require('../const');
+const { stationRawObjectList } = require('../const');
 const { convertStationsFormat } = require('../../utils/convert');
 
 let server = null;
@@ -23,10 +23,10 @@ describe('/api/stations', () => {
         test('should return the station when id is correct', async () => {
             const { saveStations } = require('../../utils/update/stations');
             // define the raw data object:
-            const stationId = stationsDataRaw[0].id;
-            const stationName = stationsDataRaw[0].name;
-            const stationsData = convertStationsFormat(stationsDataRaw);
-            await saveStations(stationsData);
+            const stationId = stationRawObjectList[0].id;
+            const stationName = stationRawObjectList[0].name;
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            await saveStations(stationObjectList);
             // read database through api endpoint:
             const res = await request(server).get(`/api/stations/${stationId}`);
             // compare results:

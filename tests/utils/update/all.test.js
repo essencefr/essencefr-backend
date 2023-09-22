@@ -5,7 +5,7 @@
 const mongoose = require('mongoose');
 const { Station } = require('../../../models/station');
 const { processRawData } = require('../../../utils/update/all');
-const { filterStationsData } = require('../../../utils/update/all');
+const { filterstationObjectList } = require('../../../utils/update/all');
 const { convertStationsFormat } = require('../../../utils/convert');
 
 
@@ -13,12 +13,12 @@ describe('generic update feature', () => {
 
     describe('main process', () => {
         test('processing raw data with missing fields should raise an error', () => {
-            const stationsDataRaw = [
+            const stationRawObjectList = [
                 { id: 1, name: 'a' },
             ];
             // ensure that a validation error is thrown:
             expect(() => {
-                processRawData(stationsDataRaw);
+                processRawData(stationRawObjectList);
             }).toThrow(/validation error/i);
         });
     });
@@ -32,23 +32,23 @@ describe('generic update feature', () => {
         afterAll(() => { mongoose.disconnect(); });
 
         test('an unknown station data object should be correctly filtered as new', async () => {
-            const { stationsDataRaw } = require('../../const');
-            const stationsData = convertStationsFormat(stationsDataRaw);
-            const stationsDataFiltered = await filterStationsData(stationsData);
-            expect(stationsDataFiltered).toBeDefined();
-            expect(stationsDataFiltered.stationsDataNew.length).toBe(1);
-            expect(stationsDataFiltered.stationsDataKnown.length).toBe(0);
+            const { stationRawObjectList } = require('../../const');
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            const stationObjectListFiltered = await filterstationObjectList(stationObjectList);
+            expect(stationObjectListFiltered).toBeDefined();
+            expect(stationObjectListFiltered.stationObjectListNew.length).toBe(1);
+            expect(stationObjectListFiltered.stationObjectListKnown.length).toBe(0);
         });
 
         test('an already known station data object should be correctly filtered as known', async () => {
-            const { stationsDataRaw } = require('../../const');
+            const { stationRawObjectList } = require('../../const');
             const { saveStations } = require('../../../utils/update/stations');
-            const stationsData = convertStationsFormat(stationsDataRaw);
-            await saveStations(stationsData);
-            const stationsDataFiltered = await filterStationsData(stationsData);
-            expect(stationsDataFiltered).toBeDefined();
-            expect(stationsDataFiltered.stationsDataNew.length).toBe(0);
-            expect(stationsDataFiltered.stationsDataKnown.length).toBe(1);
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            await saveStations(stationObjectList);
+            const stationObjectListFiltered = await filterstationObjectList(stationObjectList);
+            expect(stationObjectListFiltered).toBeDefined();
+            expect(stationObjectListFiltered.stationObjectListNew.length).toBe(0);
+            expect(stationObjectListFiltered.stationObjectListKnown.length).toBe(1);
         });
     });
 });

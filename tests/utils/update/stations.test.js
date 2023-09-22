@@ -5,7 +5,7 @@
 const request = require('supertest');  // function used to send a request to an endpoint
 const mongoose = require('mongoose');
 const { Station } = require('../../../models/station');
-const { stationsDataRaw } = require('../../const');
+const { stationRawObjectList } = require('../../const');
 const { saveStations } = require('../../../utils/update/stations');
 const { convertStationsFormat } = require('../../../utils/convert');
 
@@ -25,11 +25,11 @@ describe('save/update station feature', () => {
     describe('saving station data into database', () => {
         test('data should be avaiable after being saved into the DB', async () => {
             // get the raw data object elements:
-            const stationId = stationsDataRaw[0].id;
-            const stationName = stationsDataRaw[0].name;
+            const stationId = stationRawObjectList[0].id;
+            const stationName = stationRawObjectList[0].name;
             // save data:
-            const stationsData = convertStationsFormat(stationsDataRaw);
-            await saveStations(stationsData);
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            await saveStations(stationObjectList);
             // read database through api endpoint:
             const res = await request(server).get(`/api/stations/${stationId}`);
             // compare results:
@@ -39,25 +39,25 @@ describe('save/update station feature', () => {
         });
         
         test('saving two stations with the same _id should raise an error and none of the stations should be saved into the DB', async () => {
-            const stationsData = convertStationsFormat(stationsDataRaw);
-            stationsData.push(stationsData[0]);  // duplicate doc in the array
-            await expect(saveStations(stationsData)).rejects.toThrow(/duplicate key error/i);
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            stationObjectList.push(stationObjectList[0]);  // duplicate doc in the array
+            await expect(saveStations(stationObjectList)).rejects.toThrow(/duplicate key error/i);
             // read database through api endpoint:
-            const res = await request(server).get(`/api/stations/${stationsData[0]._id}`);
+            const res = await request(server).get(`/api/stations/${stationObjectList[0]._id}`);
             expect(res.status).toBe(404);
         });
 
         test('saving no converted raw data should raise an error', async () => {
             // ensure that missing fields are detected:
-            await expect(saveStations(stationsDataRaw)).rejects.toThrow(/Path .* is required/i);
+            await expect(saveStations(stationRawObjectList)).rejects.toThrow(/Path .* is required/i);
         });
         
         test('a field unkown by the model should not be saved in the DB', async () => {
-            let stationsData = convertStationsFormat(stationsDataRaw);
-            stationsData[0].newField = "a new field";
-            await saveStations(stationsData);
+            let stationObjectList = convertStationsFormat(stationRawObjectList);
+            stationObjectList[0].newField = "a new field";
+            await saveStations(stationObjectList);
             // read database through api endpoint:
-            const res = await request(server).get(`/api/stations/${stationsData[0]._id}`);
+            const res = await request(server).get(`/api/stations/${stationObjectList[0]._id}`);
             expect(res.status).toBe(200);
             expect(res.body.newField).toBeUndefined();
         });

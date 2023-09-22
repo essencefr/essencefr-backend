@@ -5,8 +5,10 @@
 - [My data format](#my-data-format)
   - [Station](#station)
   - [History](#history)
-  - [Fuel details](#fuel-details)
-  - [Brands (mabye for later)](#brands-mabye-for-later)
+  - [Fuel](#fuel)
+  - [Brand](#brand)
+- [Naming convention](#naming-convention)
+  - [Station](#station-1)
 
 # Raw data format
 Here's the data format when retrieving details from government endpoint:
@@ -175,7 +177,7 @@ Histories are separated based on `stationId` and `fuelId` for faster data filter
 
 > Another possiblity is to separate histories values based on `stationId`, `fuelId` AND `date` in order to filter by date within the query too. The performance-storage ratio has to be evaluated to determine if this is a viable solution.
 
-## Fuel details
+## Fuel
 Here's my data format for storing generic fuel details:
 
 ```json
@@ -222,7 +224,7 @@ Here's my data format for storing generic fuel details:
 }
 ```
 
-## Brands (mabye for later)
+## Brand
 Here's my data format for storing generic brands details:
 
 ```json
@@ -366,3 +368,11 @@ Here's my data format for storing generic brands details:
     "nbStations": 79
 }
 ```
+
+# Naming convention
+
+## Station
+- `stationRawObjectList`: list of `stationRawObject` objects. This is the format returned by the government API called in function `fetchStations`.
+- `stationRawObject`: object in the list returned by the government API called in function `fetchStations`.
+- `stationObject`: object manipulated by the server, matching the structure defined in models (i.e. matching the document in the DB). A converter can turn a `stationRawObject` object into a `stationObject` object.
+- `stationObjectList`: list of `stationObject` objects.

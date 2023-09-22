@@ -3,7 +3,7 @@
  */
 
 // real extract retrieved from the gov API
-const stationsDataRaw = [
+const stationRawObjectList = [
     {
         "id": 33700009,
         "Brand": {
@@ -84,4 +84,4 @@ const stationsDataRaw = [
     }
 ];
 
-module.exports.stationsDataRaw = stationsDataRaw;
+module.exports.stationRawObjectList = stationRawObjectList;

@@ -6,31 +6,31 @@
 const { validateStationRaw } = require('../models/station');
 
 /**
- * Convert a single station raw data into the format expected by the DB
- * @param stationDataRaw single station data in JSON format such as defined by the government API
+ * Convert a single station raw object into the format expected by the DB
+ * @param stationRawObject single station object in JSON format such as defined by the government API
  */
-function convertStationFormat(stationDataRaw) {
-    const { error } = validateStationRaw(stationDataRaw);
+function convertStationFormat(stationRawObject) {
+    const { error } = validateStationRaw(stationRawObject);
     if(error) throw Error(`Validation error: ${error.details[0].message}`);
-    const stationData = {
-        _id: stationDataRaw.id,
-        name: stationDataRaw.name,
+    const stationObject = {
+        _id: stationRawObject.id,
+        name: stationRawObject.name,
         brand: {
-            id: stationDataRaw.Brand.id,
-            name: stationDataRaw.Brand.name
+            id: stationRawObject.Brand.id,
+            name: stationRawObject.Brand.name
         },
         address: {
-            streetLine: stationDataRaw.Address.street_line,
-            cityLine: stationDataRaw.Address.city_line
+            streetLine: stationRawObject.Address.street_line,
+            cityLine: stationRawObject.Address.city_line
         },
         coordinates: {
-            latitude: stationDataRaw.Coordinates.latitude,
-            longitude: stationDataRaw.Coordinates.longitude
+            latitude: stationRawObject.Coordinates.latitude,
+            longitude: stationRawObject.Coordinates.longitude
         },
         fuels: []
     };
-    stationDataRaw.Fuels.forEach(element => {
-        stationData.fuels.push({
+    stationRawObject.Fuels.forEach(element => {
+        stationObject.fuels.push({
             id: element.id,
             shortName: element.short_name,
             date: new Date(element.Update.value),
@@ -38,19 +38,19 @@ function convertStationFormat(stationDataRaw) {
             price: element.Price.value
         });
     });
-    return stationData;
+    return stationObject;
 };
 
 /**
- * Convert multiple stations raw data into the format expected by the DB
- * @param {*} stationsDataRaw multiple stations data in JSON format such as defined by the government API
+ * Convert multiple station raw objects into the format expected by the DB
+ * @param {*} stationRawObjectList multiple station objects in JSON format such as defined by the government API
  */
-function convertStationsFormat(stationsDataRaw) {
-    let stationsData = [];
-    stationsDataRaw.forEach(element => {
-        stationsData.push(convertStationFormat(element));
+function convertStationsFormat(stationRawObjectList) {
+    let stationObjectList = [];
+    stationRawObjectList.forEach(element => {
+        stationObjectList.push(convertStationFormat(element));
     });
-    return stationsData;
+    return stationObjectList;
 };
 
 module.exports.convertStationsFormat = convertStationsFormat;

@@ -11,11 +11,11 @@ describe('fetch functions', () => {
             const longitude = 44.806;  // Pessac coordinates
             const latitude = -0.631;
             // fetch data:
-            const stationsDataRaw = await fetchStations(longitude, latitude);
+            const stationRawObjectList = await fetchStations(longitude, latitude);
             // check format retrieved:
-            expect(stationsDataRaw).toBeDefined();
-            expect(stationsDataRaw.length).toBeGreaterThanOrEqual(1);
-            const { error } = validateStationRaw(stationsDataRaw[0]);
+            expect(stationRawObjectList).toBeDefined();
+            expect(stationRawObjectList.length).toBeGreaterThanOrEqual(1);
+            const { error } = validateStationRaw(stationRawObjectList[0]);
             expect(error).toBeUndefined();
         });
 
@@ -23,10 +23,10 @@ describe('fetch functions', () => {
             const longitude = 41.403;  // Barcelona coordinates
             const latitude = 2.174;
             // fetch data:
-            const stationsDataRaw = await fetchStations(longitude, latitude);
+            const stationRawObjectList = await fetchStations(longitude, latitude);
             // check format retrieved:
-            expect(stationsDataRaw).toBeDefined();
-            expect(stationsDataRaw.length).toBe(0);
+            expect(stationRawObjectList).toBeDefined();
+            expect(stationRawObjectList.length).toBe(0);
         });
     });
 });
