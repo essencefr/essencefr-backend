@@ -13,7 +13,9 @@ let server = null;
 
 // main test suite:
 describe('save/update station feature', () => {
-    beforeEach(() => { server = require('../../../index'); });
+    beforeEach(() => {
+        server = require('../../../index');
+    });
     afterEach(async () => {
         server.close();
         await Station.deleteMany({});
@@ -32,15 +34,16 @@ describe('save/update station feature', () => {
             const res = await request(server).get(`/api/stations/${stationId}`);
             // compare results:
             expect(res.status).toBe(200);
+            expect(res.body._id).toEqual(stationId);
             expect(res.body.name).toEqual(stationName);
         });
         
-        test('saving two stations with the same _id should raise an error and none of the stations should be save into the DB', async () => {
-            stationsDataRaw.push(stationsDataRaw[0]);  // duplicate doc in the array
+        test('saving two stations with the same _id should raise an error and none of the stations should be saved into the DB', async () => {
             const stationsData = convertStationsFormat(stationsDataRaw);
+            stationsData.push(stationsData[0]);  // duplicate doc in the array
             await expect(saveStations(stationsData)).rejects.toThrow(/duplicate key error/i);
             // read database through api endpoint:
-            const res = await request(server).get(`/api/stations/${stationsDataRaw[0].id}`);
+            const res = await request(server).get(`/api/stations/${stationsData[0]._id}`);
             expect(res.status).toBe(404);
         });
 
@@ -52,9 +55,11 @@ describe('save/update station feature', () => {
         test('a field unkown by the model should not be saved in the DB', async () => {
             let stationsData = convertStationsFormat(stationsDataRaw);
             stationsData[0].newField = "a new field";
-            const docsAfterValidation = await saveStations(stationsData);
-            // Ensure that the unkown field has been removed:
-            expect(docsAfterValidation[0].newField).toBeUndefined();
+            await saveStations(stationsData);
+            // read database through api endpoint:
+            const res = await request(server).get(`/api/stations/${stationsData[0]._id}`);
+            expect(res.status).toBe(200);
+            expect(res.body.newField).toBeUndefined();
         });
     });
 });
