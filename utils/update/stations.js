@@ -16,7 +16,7 @@ async function saveStations(stationsData){
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        await Station.collection.insertMany(stationsData, { session });
+        await Station.insertMany(stationsData, { session });
         await session.commitTransaction();  // commit transaction
     } catch (e) {
         await session.abortTransaction();

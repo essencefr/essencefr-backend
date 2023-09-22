@@ -11,16 +11,25 @@ const Station = mongoose.model('Station', new mongoose.Schema({
     _id: { type: Number, required: true },
     name: { type: String, required: true },
     brand: {
-        id: { type: Number, required: true },
-        name: { type: String, required: true }
+        type: {
+            id: { type: Number, required: true },
+            name: { type: String, required: true }
+        },
+        required: true
     },
     address: {
-        streetLine: { type: String, required: true },
-        cityLine: { type: String, required: true }
+        type: {
+            streetLine: { type: String, required: true },
+            cityLine: { type: String, required: true }
+        },
+        required: true
     },
     coordinates: {
-        latitude: {type: Number, required: true },
-        longitude: { type: Number, required: true }
+        type: {
+            latitude: {type: Number, required: true },
+            longitude: { type: Number, required: true }
+        },
+        required: true
     },
     fuels: {
         type: [{
@@ -30,7 +39,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
             available: { type: Boolean, required: true },
             price: { type: Number, required: true }
         }],
-        default: []
+        // default: []  // arrays are always '[]' by default in mongoose models
     }
 }));
 
