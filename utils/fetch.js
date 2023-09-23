@@ -1,5 +1,5 @@
 /**
- * Function fetching data on others servers APIs
+ * Functions fetching data on others servers APIs
  */
 
 /**

@@ -4,6 +4,7 @@
 
 const mongoose = require('mongoose');
 const { Station } = require("../../models/station");
+const { runInMongooseTransaction } = require('../transactions');
 
 
 /**
@@ -12,18 +13,9 @@ const { Station } = require("../../models/station");
  */
 async function saveStations(stationObjectList){
     // save the data within a transaction so that no data will be stored if an _id already exists:
-    // TODO: Improvement - use a wrapper for transactions. More details here: https://blog.tericcabrel.com/how-to-use-mongodb-transaction-in-node-js/
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    try {
+    await runInMongooseTransaction(async (session) => {
         await Station.insertMany(stationObjectList, { session });
-        await session.commitTransaction();  // commit transaction
-    } catch (e) {
-        await session.abortTransaction();
-        throw Error(e);
-    } finally {
-        await session.endSession();
-    }
+    });
 };
 
 /**
