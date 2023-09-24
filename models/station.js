@@ -12,7 +12,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
     name: { type: String, required: true },
     brand: {
         type: {
-            id: { type: Number, required: true },
+            _id: { type: Number, required: true },
             name: { type: String, required: true }
         },
         required: true
@@ -33,7 +33,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
     },
     fuels: {
         type: [{
-            id: { type: Number, required: true },
+            _id: { type: Number, required: true },
             shortName: { type: String, required: true },
             date: { type: Date, required: true },
             available: { type: Boolean, required: true },

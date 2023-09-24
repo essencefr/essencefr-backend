@@ -11,12 +11,12 @@ const { validateStationRaw } = require('../models/station');
  */
 function convertStationFormat(stationRawObject) {
     const { error } = validateStationRaw(stationRawObject);
-    if(error) throw Error(`Validation error: ${error.details[0].message}`);
+    if (error) throw Error(`Validation error: ${error.details[0].message}`);
     const stationObject = {
         _id: stationRawObject.id,
         name: stationRawObject.name,
         brand: {
-            id: stationRawObject.Brand.id,
+            _id: stationRawObject.Brand.id,
             name: stationRawObject.Brand.name
         },
         address: {
@@ -31,7 +31,7 @@ function convertStationFormat(stationRawObject) {
     };
     stationRawObject.Fuels.forEach(element => {
         stationObject.fuels.push({
-            id: element.id,
+            _id: element.id,
             shortName: element.short_name,
             date: new Date(element.Update.value),
             available: element.available,
