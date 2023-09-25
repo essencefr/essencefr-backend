@@ -5,7 +5,7 @@
 const mongoose = require('mongoose');
 const { Station } = require('../../../models/station');
 const { processRawData } = require('../../../utils/update/all');
-const { filterstationObjectList } = require('../../../utils/update/all');
+const { filterStationObjects } = require('../../../utils/update/all');
 const { convertStationsFormat } = require('../../../utils/convert');
 
 
@@ -34,21 +34,21 @@ describe('generic update feature', () => {
         test('an unknown station data object should be correctly filtered as new', async () => {
             const { stationRawObjectList } = require('../../const');
             const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const stationObjectListFiltered = await filterstationObjectList(stationObjectList);
+            const stationObjectListFiltered = await filterStationObjects(stationObjectList);
             expect(stationObjectListFiltered).toBeDefined();
-            expect(stationObjectListFiltered.stationObjectListNew.length).toBe(1);
-            expect(stationObjectListFiltered.stationObjectListKnown.length).toBe(0);
+            expect(stationObjectListFiltered.stationObjectsNew.length).toBe(1);
+            expect(stationObjectListFiltered.stationObjectsKnown.length).toBe(0);
         });
 
         test('an already known station data object should be correctly filtered as known', async () => {
             const { stationRawObjectList } = require('../../const');
-            const { saveStations } = require('../../../utils/update/stations');
+            const { updateStationsCollection } = require('../../../utils/update/stations');
             const stationObjectList = convertStationsFormat(stationRawObjectList);
-            await saveStations(stationObjectList);
-            const stationObjectListFiltered = await filterstationObjectList(stationObjectList);
+            await updateStationsCollection(stationObjectList, []);
+            const stationObjectListFiltered = await filterStationObjects(stationObjectList);
             expect(stationObjectListFiltered).toBeDefined();
-            expect(stationObjectListFiltered.stationObjectListNew.length).toBe(0);
-            expect(stationObjectListFiltered.stationObjectListKnown.length).toBe(1);
+            expect(stationObjectListFiltered.stationObjectsNew.length).toBe(0);
+            expect(stationObjectListFiltered.stationObjectsKnown.length).toBe(1);
         });
     });
 });

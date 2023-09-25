@@ -21,12 +21,12 @@ describe('/api/stations', () => {
 
     describe('GET /:id', () => {
         test('should return the station when id is correct', async () => {
-            const { saveStations } = require('../../utils/update/stations');
+            const { updateStationsCollection } = require('../../utils/update/stations');
             // define the raw data object:
             const stationId = stationRawObjectList[0].id;
             const stationName = stationRawObjectList[0].name;
             const stationObjectList = convertStationsFormat(stationRawObjectList);
-            await saveStations(stationObjectList);
+            await updateStationsCollection(stationObjectList, []);
             // read database through api endpoint:
             const res = await request(server).get(`/api/stations/${stationId}`);
             // compare results:
