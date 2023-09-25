@@ -7,7 +7,7 @@ const { runInMongooseTransaction } = require('../transactions');
 
 
 /**
- * Insert and update documents in DB collection in a single 'bulkWrite' instruction
+ * Insert and update documents in DB collection in a single 'bulkWrite' instruction, within a transaction
  * @param {Array<Object>} stationObjectsToInsert List of station objects to insert in the DB
  * @param {Array<Object>} stationObjectsToUpdate List of station objects to update within the DB
  */

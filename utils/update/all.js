@@ -8,7 +8,7 @@ const { Station } = require('../../models/station');
 
 /**
  * Takes stations raw data and save/update documents in the DB
- * @param {*} stationRawObjectList raw data provided by the gov API
+ * @param {Array<Object>} stationRawObjectList raw data provided by the gov API
  */
 function processRawData(stationRawObjectList) {
     const stationObjectList = convertStationsFormat(stationRawObjectList);
@@ -50,7 +50,7 @@ function processRawData(stationRawObjectList) {
  * Separate a stationObjectList in two arrays:
  *  - one containing the station objects unknown by the DB
  *  - one containing the station objects already known in the DB  // TODO: make it be an array containing only the stations objects that have new values (compare hash)
- * @param {*} stationObjectList list of station objects matching the mongoose schema defined in models
+ * @param {Array<Object>} stationObjectList list of station objects matching the mongoose schema defined in models
  */
 async function filterStationObjects(stationObjectList) {
     // create array with only station ids from input:
