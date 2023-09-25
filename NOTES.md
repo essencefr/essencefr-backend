@@ -9,6 +9,11 @@
   - [Brand](#brand)
 - [Naming convention](#naming-convention)
   - [Station](#station-1)
+- [Mongoose operators used](#mongoose-operators-used)
+  - [For inserting stations into the DB](#for-inserting-stations-into-the-db)
+    - [Model.insertMany()](#modelinsertmany)
+    - [Model.bulkWrite()](#modelbulkwrite)
+      - [Idem but with delay needed for 'hydrate':](#idem-but-with-delay-needed-for-hydrate)
 
 # Raw data format
 Here's the data format when retrieving details from government endpoint:
@@ -376,3 +381,144 @@ Here's my data format for storing generic brands details:
 - `stationRawObject`: object in the list returned by the government API called in function `fetchStations`.
 - `stationObject`: object manipulated by the server, matching the structure defined in models (i.e. matching the document in the DB). A converter can turn a `stationRawObject` object into a `stationObject` object.
 - `stationObjectList`: list of `stationObject` objects.
+
+# Mongoose operators used
+## For inserting stations into the DB
+### Model.insertMany()
+
+First possibility:
+```javaScript
+await Station.insertMany(stationObjectList);
+```
+
+How long does it take, is it faster than the second posibility below ?
+
+**Test**: inserting 100 documents, 100 times:
+```
+Elapsed time: 124.491 ms    -> the firsts attempts have a delay due to the connection init ?
+Elapsed time: 74.1833 ms
+Elapsed time: 40.7187 ms
+Elapsed time: 37.931 ms
+Elapsed time: 31.0544 ms
+Elapsed time: 34.4382 ms
+Elapsed time: 29.2069 ms
+Elapsed time: 31.9093 ms
+Elapsed time: 38.1188 ms
+Elapsed time: 27.2704 ms
+Elapsed time: 27.6041 ms
+Elapsed time: 28.5629 ms
+Elapsed time: 26.5136 ms
+Elapsed time: 27.562 ms
+Elapsed time: 27.5133 ms
+Elapsed time: 27.8476 ms
+Elapsed time: 26.9144 ms
+Elapsed time: 26.306 ms
+Elapsed time: 26.8036 ms
+Elapsed time: 27.8817 ms
+...
+Elapsed time: 27.7975 ms
+Elapsed time: 26.4122 ms
+Elapsed time: 26.2484 ms
+Elapsed time: 25.1616 ms
+Elapsed time: 25.9745 ms
+Elapsed time: 30.9043 ms
+Elapsed time: 26.4422 ms
+Elapsed time: 27.0135 ms
+Elapsed time: 24.5838 ms
+Elapsed time: 24.725 ms
+-> Average time: 28.640007999999998 ms
+```
+
+### Model.bulkWrite()
+
+First possibility:
+```javaScript
+await Station.bulkWrite([
+    { insertOne:
+        { document: stationDocument1 }
+    },
+    { insertOne:
+        { document: stationDocument2 }
+    },
+    { insertOne:
+        { document: stationDocument3 }
+    },
+    ...
+]);
+```
+
+How long does it take, is it faster than the second posibility below ?
+
+**Test**: inserting 100 documents, 100 times:
+```
+Elapsed time: 37.696 ms
+Elapsed time: 8.7049 ms
+Elapsed time: 7.6542 ms
+Elapsed time: 9.2871 ms
+Elapsed time: 10.7342 ms
+Elapsed time: 7.2015 ms
+Elapsed time: 10.6637 ms
+Elapsed time: 6.3165 ms
+Elapsed time: 5.1572 ms
+Elapsed time: 8.3572 ms
+Elapsed time: 5.0331 ms
+Elapsed time: 5.3403 ms
+Elapsed time: 4.027 ms
+Elapsed time: 3.5225 ms
+Elapsed time: 4.8072 ms
+Elapsed time: 4.0876 ms
+Elapsed time: 4.9955 ms
+Elapsed time: 4.9986 ms
+Elapsed time: 4.7928 ms
+Elapsed time: 5.0342 ms
+...
+Elapsed time: 3.9837 ms
+Elapsed time: 3.1895 ms
+Elapsed time: 3.3444 ms
+Elapsed time: 4.6813 ms
+Elapsed time: 4.3637 ms
+Elapsed time: 3.4764 ms
+Elapsed time: 4.5968 ms
+Elapsed time: 3.2453 ms
+Elapsed time: 3.1293 ms
+Elapsed time: 3.1997 ms
+-> Average time: 4.579684000000001 ms
+```
+
+#### Idem but with delay needed for 'hydrate':
+
+**Test**: inserting 100 documents, 100 times:
+```
+Elapsed time: 43.8554 ms
+Elapsed time: 9.3227 ms
+Elapsed time: 8.545 ms
+Elapsed time: 10.1251 ms
+Elapsed time: 9.8609 ms
+Elapsed time: 9.4164 ms
+Elapsed time: 8.9185 ms
+Elapsed time: 7.2968 ms
+Elapsed time: 5.8808 ms
+Elapsed time: 6.636 ms
+Elapsed time: 6.1569 ms
+Elapsed time: 5.1697 ms
+Elapsed time: 4.6358 ms
+Elapsed time: 4.2156 ms
+Elapsed time: 5.2485 ms
+Elapsed time: 5.0956 ms
+Elapsed time: 6.2162 ms
+Elapsed time: 5.4772 ms
+Elapsed time: 4.4558 ms
+Elapsed time: 4.8361 ms
+...
+Elapsed time: 3.5713 ms
+Elapsed time: 3.6596 ms
+Elapsed time: 4.6219 ms
+Elapsed time: 3.4062 ms
+Elapsed time: 3.8118 ms
+Elapsed time: 4.4709 ms
+Elapsed time: 3.3923 ms
+Elapsed time: 3.5847 ms
+Elapsed time: 3.8712 ms
+Elapsed time: 4.2017 ms
+-> Average time: 5.087847 ms
+```
