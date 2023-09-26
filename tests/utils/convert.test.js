@@ -46,9 +46,10 @@ describe('convert features', () => {
             await expect(doc.validate()).resolves.toBeUndefined();
         });
 
-        test('generating object from station object with wrong format should fail', () => {
-            // TODO
-            expect(1).toBe(1);
+        test('generating history object from station object with wrong format should throw', () => {
+            expect(() => {
+                generateHistoryObjectList(stationRawObjectList);
+            }).toThrow();
         });
     });
 
@@ -61,9 +62,10 @@ describe('convert features', () => {
             expect(error).toBeUndefined();
         });
 
-        test('generating object from station object with wrong format should fail', () => {
-            // TODO
-            expect(1).toBe(1);
+        test('generating history update object from station object with wrong format should throw', () => {
+            expect(() => {
+                generateHistoryUpdateObjectList(stationRawObjectList);
+            }).toThrow();
         });
     });
 });

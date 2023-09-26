@@ -2,7 +2,7 @@
  * Functions used to update values in the database
  */
 
-const { History } = require("../../models/history");
+const { History, validateHistoryUpdate } = require("../../models/history");
 const { runInMongooseTransaction } = require('../transactions');
 
 
@@ -12,29 +12,33 @@ const { runInMongooseTransaction } = require('../transactions');
  * @param {Array<Object>} historyObjectsToUpdate List of history objects to update within the DB
  */
 async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToUpdate) {
-    if(typeof historyObjectsToInsert == 'undefined') throw Error(`You should provide a 'historyObjectsToInsert' parameter. Given: '${historyObjectsToInsert}'`);
-    if(typeof historyObjectsToUpdate == 'undefined') throw Error(`You should provide a 'historyObjectsToUpdate' parameter. Given: '${historyObjectsToUpdate}'`);
+    if (typeof historyObjectsToInsert == 'undefined') throw Error(`You should provide a 'historyObjectsToInsert' parameter. Given: '${historyObjectsToInsert}'`);
+    if (typeof historyObjectsToUpdate == 'undefined') throw Error(`You should provide a 'historyObjectsToUpdate' parameter. Given: '${historyObjectsToUpdate}'`);
     let bulkOperations = [];
     // insert operations:
-    for(let i=0; i < historyObjectsToInsert.length; i++) {
+    for (let i = 0; i < historyObjectsToInsert.length; i++) {
         bulkOperations.push({
-            insertOne:
-                {
-                    document: historyObjectsToInsert[i]
-                }
+            insertOne: {
+                document: historyObjectsToInsert[i]
+            }
         });
     };
     // update operations:
-    for(let i=0; i < historyObjectsToUpdate.length; i++) {
+    for (let i = 0; i < historyObjectsToUpdate.length; i++) {
+        const { error } = validateHistoryUpdate(historyObjectsToUpdate[i]);
+        if (error) throw Error(`Validation error: ${error.details[0].message}`);
         bulkOperations.push({
-            updateOne:
-                {
-                    filter: {
-                        'station._id': historyObjectsToUpdate[i].station._id,
-                        'fuel._id': historyObjectsToUpdate[i].fuel._id
-                    },
-                    update: { $push: { history: historyObjectsToUpdate[i].history[0] } }  // TODO: ensure that historyObjectsToUpdate[i].history has a single element
+            updateOne: {
+                filter: {
+                    'station._id': historyObjectsToUpdate[i].station._id,
+                    'fuel._id': historyObjectsToUpdate[i].fuel._id
+                },
+                update: {
+                    $set: { 'station.name': historyObjectsToUpdate[i].station.name,
+                            'fuel.shortName': historyObjectsToUpdate[i].fuel.shortName },
+                    $push: { history: historyObjectsToUpdate[i].newPrice }
                 }
+            }
         });
     };
     // execute:
