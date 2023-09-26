@@ -50,7 +50,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
  * The raw data contains a lot of details, I only check that the detials I really need are present.
  */
 function validateStationRaw(jsonData) {
-    const stationSchema = Joi.object({
+    const stationRawSchema = Joi.object({
         id: Joi.number().required(),
         name: Joi.string().required(),
         Brand: Joi.object().required().keys({
@@ -79,7 +79,7 @@ function validateStationRaw(jsonData) {
             })
         ).sparse()  // allows undefined values inside the array
     });
-    return stationSchema.validate(jsonData, { allowUnknown: true });  // 'allowUnknown' allows the object to have additional paramaters that are not defined in this schema
+    return stationRawSchema.validate(jsonData, { allowUnknown: true });  // 'allowUnknown' allows the object to have additional paramaters that are not defined in this schema
 };
 
 /**
