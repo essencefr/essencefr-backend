@@ -75,13 +75,10 @@ function validateHistoryUpdate(object) {
             _id: Joi.number().required(),
             shortName: Joi.string().required()
         }),
-        newPrice: Joi.alternatives().try(
-            Joi.object().keys({
-                price: Joi.number().required(),
-                date: Joi.date().required()
-            }),
-            Joi.string().allow(null)
-        ).required()
+        newPrice: Joi.object().keys({
+            price: Joi.number().required(),
+            date: Joi.date().required()
+        })
     });
     return historyUpdateSchema.validate(object);
 }
