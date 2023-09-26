@@ -64,6 +64,7 @@ function generateHistoryObject(stationObject) {
     let historyObject = null;
     for(let i = 0; i < stationObject.fuels.length; i++) {
         historyObject = {
+            _id: parseInt(`${stationObject._id}${stationObject.fuels[i]._id}`),
             station: {
                 _id: stationObject._id,
                 name: stationObject.name

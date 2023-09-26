@@ -6,7 +6,8 @@ const mongoose = require('mongoose');
 
 /***** Genreric varaibles/const *****/
 
-const History = mongoose.model('Histories', new mongoose.Schema({
+const historySchema = new mongoose.Schema({
+    _id: { type: Number, required: true },
     station: {
         type: {
             _id : {
@@ -46,6 +47,13 @@ const History = mongoose.model('Histories', new mongoose.Schema({
         }],
         // default: []  // arrays are always '[]' by default in mongoose models
     }
-}));
+});
+
+// custom static method:
+historySchema.static('findByStationAndFuelIds', function(stationId, fuelId) {
+    return this.findById(parseInt(`${stationId}${fuelId}`));
+});
+
+const History = mongoose.model('Histories', historySchema);
 
 module.exports.History = History;
