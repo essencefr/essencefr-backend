@@ -26,27 +26,25 @@ describe('save/update station feature', () => {
 
     describe('insert station data into database', () => {
         test('data should be avaiable after being saved into the DB', async () => {
-            // get the raw data object elements:
-            const stationId = stationRawObjectList[0].id;
-            const stationName = stationRawObjectList[0].name;
             // save data:
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            await updateStationsCollection(stationObjectList, []);
-            // read database through api endpoint:
-            const res = await request(server).get(`/api/stations/${stationId}`);
+            const stationObject = convertStationsFormat(stationRawObjectList)[0];
+            await updateStationsCollection([stationObject], []);
+            // read DB:
+            const doc = await Station.findById(stationObject._id);
             // compare results:
-            expect(res.status).toBe(200);
-            expect(res.body._id).toEqual(stationId);
-            expect(res.body.name).toEqual(stationName);
+            expect(doc).not.toBeNull();
+            expect(doc._id).toEqual(stationObject._id);
+            expect(doc.name).toEqual(stationObject.name);
         });
         
         test('saving two stations with the same _id should raise an error and none of the stations should be saved into the DB', async () => {
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            stationObjectList.push(stationObjectList[0]);  // duplicate doc in the array
+            const stationObject = convertStationsFormat(stationRawObjectList)[0];
+            const stationObjectList = [stationObject, stationObject];  // array with two identical documents
             await expect(updateStationsCollection(stationObjectList, [])).rejects.toThrow(/duplicate key error/i);
-            // read database through api endpoint:
-            const res = await request(server).get(`/api/stations/${stationObjectList[0]._id}`);
-            expect(res.status).toBe(404);
+            // read DB:
+            const doc = await Station.findById(stationObject._id);
+            // compare results:
+            expect(doc).toBeNull();
         });
 
         test('saving no converted raw data should raise an error', async () => {
@@ -55,29 +53,31 @@ describe('save/update station feature', () => {
         });
         
         test('a field unkown by the model should not be saved in the DB', async () => {
-            let stationObjectList = convertStationsFormat(stationRawObjectList);
-            stationObjectList[0].newField = "a new field";
-            await updateStationsCollection(stationObjectList, []);
-            // read database through api endpoint:
-            const res = await request(server).get(`/api/stations/${stationObjectList[0]._id}`);
-            expect(res.status).toBe(200);
-            expect(res.body.newField).toBeUndefined();
+            let stationObject = convertStationsFormat(stationRawObjectList)[0];
+            stationObject.newField = "a new field";
+            await updateStationsCollection([stationObject], []);
+            // read DB:
+            const doc = await Station.findById(stationObject._id);
+            // compare results:
+            expect(doc).not.toBeNull();
+            expect(doc.newField).toBeUndefined();
         });
     });
 
     describe('updating station data into database', () => {
         test('data updated should be avaiable after updating an existing document', async () => {
-            let stationObjectList = convertStationsFormat(stationRawObjectList);
-            const stationId = stationObjectList[0]._id;
+            let stationObject = convertStationsFormat(stationRawObjectList)[0];
+            const stationId = stationObject._id;
+            await updateStationsCollection([stationObject], []);  // insert document into DB
             const newStationName = "New station name";
-            await updateStationsCollection(stationObjectList, []);  // insert document into DB
-            stationObjectList[0].name = newStationName;
-            await updateStationsCollection([], stationObjectList);  // update documents
-            const res = await request(server).get(`/api/stations/${stationId}`);
+            stationObject.name = newStationName;
+            await updateStationsCollection([], [stationObject]);  // update documents
+            // read DB:
+            const doc = await Station.findById(stationObject._id);
             // compare results:
-            expect(res.status).toBe(200);
-            expect(res.body._id).toEqual(stationId);
-            expect(res.body.name).toEqual(newStationName);
+            expect(doc).not.toBeNull();
+            expect(doc._id).toEqual(stationId);
+            expect(doc.name).toEqual(newStationName);
         });
     });
 });
