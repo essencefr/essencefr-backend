@@ -2,7 +2,6 @@
  * Testing the save/update stations feature
  */
 
-const request = require('supertest');  // function used to send a request to an endpoint
 const mongoose = require('mongoose');
 const { Station } = require('../../../models/station');
 const { stationRawObjectList } = require('../../const');
