@@ -3,9 +3,9 @@
  */
 
 const { Station } = require('../../models/station');
-const { History } = require('../../models/history');
+const { History, validateHistoryUpdate } = require('../../models/history');
 const { stationRawObjectList } = require('../const');
-const { convertStationsFormat, generateHistoryObjectList } = require('../../utils/convert');
+const { convertStationsFormat, generateHistoryObjectList, generateHistoryUpdateObjectList } = require('../../utils/convert');
 
 
 let server = null;
@@ -44,6 +44,26 @@ describe('convert features', () => {
             expect(historyObjectList.length).toBe(3);
             const doc = History.hydrate(historyObjectList[0]);
             await expect(doc.validate()).resolves.toBeUndefined();
+        });
+
+        test('generating object from station object with wrong format should fail', () => {
+            // TODO
+            expect(1).toBe(1);
+        });
+    });
+
+    describe('generate history update objects', () => {
+        test('generated history update objects should have the Joi schema format defined in models', () => {
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            const historyUpdateObjectList = generateHistoryUpdateObjectList(stationObjectList);
+            expect(historyUpdateObjectList.length).toBe(3);
+            const { error } = validateHistoryUpdate(historyUpdateObjectList[0]);
+            expect(error).toBeUndefined();
+        });
+
+        test('generating object from station object with wrong format should fail', () => {
+            // TODO
+            expect(1).toBe(1);
         });
     });
 });

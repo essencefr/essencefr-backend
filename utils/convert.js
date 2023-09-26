@@ -98,5 +98,46 @@ function generateHistoryObjectList(stationObjectList) {
     return historyObjectList;
 };
 
+/**
+ * Generate historyUpdate object(s) from a single station object
+ * @param {Object} stationObject station object
+ */
+function generateHistoryUpdateObject(stationObject) {
+    let historyUpdateObjects = [];
+    let historyUpdateObject = null;
+    for(let i = 0; i < stationObject.fuels.length; i++) {
+        historyUpdateObject = {
+            station: {
+                _id: stationObject._id,
+                name: stationObject.name
+            },
+            fuel: {
+                _id: stationObject.fuels[i]._id,
+                shortName: stationObject.fuels[i].shortName
+            },
+            newPrice: {
+                date: stationObject.fuels[i].date,
+                price: stationObject.fuels[i].price
+            }
+        };
+        historyUpdateObjects.push(historyUpdateObject);
+        historyUpdateObject = null;
+    };
+    return historyUpdateObjects;
+};
+
+/**
+ * Generate historyUpdate object(s) from multiple station objects
+ * @param {Array<Object>} stationObjectList array of station object
+ */
+function generateHistoryUpdateObjectList(stationObjectList) {
+    let historyUpdateObjectList = [];
+    stationObjectList.forEach(element => {
+        historyUpdateObjectList.push(...generateHistoryUpdateObject(element));
+    });
+    return historyUpdateObjectList;
+};
+
 module.exports.convertStationsFormat = convertStationsFormat;
 module.exports.generateHistoryObjectList = generateHistoryObjectList;
+module.exports.generateHistoryUpdateObjectList = generateHistoryUpdateObjectList;

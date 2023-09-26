@@ -3,6 +3,8 @@
  */
 
 const mongoose = require('mongoose');
+const Joi = require('joi');
+
 
 /***** Genreric varaibles/const *****/
 
@@ -56,4 +58,33 @@ historySchema.static('findByStationAndFuelIds', function(stationId, fuelId) {
 
 const History = mongoose.model('Histories', historySchema);
 
+/***** Validation functions *****/
+
+/**
+ * Ensure that object given has the required format to be passed to the DB-update function
+ * This format is called historyUpdateObject
+ * @param {Object} object 
+ */
+function validateHistoryUpdate(object) {
+    const historyUpdateSchema = Joi.object({
+        station: Joi.object().required().keys({
+            _id: Joi.number().required(),
+            name: Joi.string().required()
+        }),
+        fuel: Joi.object().required().keys({
+            _id: Joi.number().required(),
+            shortName: Joi.string().required()
+        }),
+        newPrice: Joi.alternatives().try(
+            Joi.object().keys({
+                price: Joi.number().required(),
+                date: Joi.date().required()
+            }),
+            Joi.string().allow(null)
+        ).required()
+    });
+    return historyUpdateSchema.validate(object);
+}
+
 module.exports.History = History;
+module.exports.validateHistoryUpdate = validateHistoryUpdate;
