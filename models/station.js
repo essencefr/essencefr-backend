@@ -79,7 +79,7 @@ function validateStationRaw(jsonData) {
             })
         ).sparse()  // allows undefined values inside the array
     });
-    return stationSchema.validate(jsonData, { allowUnknown: true });
+    return stationSchema.validate(jsonData, { allowUnknown: true });  // 'allowUnknown' allows the object to have additional paramaters that are not defined in this schema
 };
 
 /**

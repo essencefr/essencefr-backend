@@ -7,7 +7,7 @@ const { validateStationRaw } = require('../models/station');
 
 /**
  * Convert a single station raw object into the format expected by the DB
- * @param stationRawObject single station object in JSON format such as defined by the government API
+ * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
  */
 function convertStationFormat(stationRawObject) {
     const { error } = validateStationRaw(stationRawObject);
@@ -43,7 +43,7 @@ function convertStationFormat(stationRawObject) {
 
 /**
  * Convert multiple station raw objects into the format expected by the DB
- * @param {*} stationRawObjectList multiple station objects in JSON format such as defined by the government API
+ * @param {Array<Object>} stationRawObjectList multiple station objects in JSON format such as defined by the government API
  */
 function convertStationsFormat(stationRawObjectList) {
     let stationObjectList = [];
@@ -53,4 +53,49 @@ function convertStationsFormat(stationRawObjectList) {
     return stationObjectList;
 };
 
+/**
+ * Generate history object(s) from single station object (as many history objects as fuel types in given station object)
+ * @param {Object} stationObject station object
+ */
+function generateHistoryObject(stationObject) {
+    // /!\ No need to validate 'stationObject' parameter AS LONG AS this function is always called after generating stationObjects with the function 'convertStationsFormat' above
+    // This allows the server to directly parse the station objects and improve its performance
+    let historyObjects = [];
+    let historyObject = null;
+    for(let i = 0; i < stationObject.fuels.length; i++) {
+        historyObject = {
+            station: {
+                _id: stationObject._id,
+                name: stationObject.name
+            },
+            fuel: {
+                _id: stationObject.fuels[i]._id,
+                shortName: stationObject.fuels[i].shortName
+            },
+            history: [
+                {
+                    date: stationObject.fuels[i].date,
+                    price: stationObject.fuels[i].price
+                }
+            ]
+        };
+        historyObjects.push(historyObject);
+        historyObject = null;
+    };
+    return historyObjects;
+};
+
+/**
+ * Generate history objects from multiple station objects
+ * @param {Array<Object>} stationObjectList array of station object
+ */
+function generateHistoryObjectList(stationObjectList) {
+    let historyObjectList = [];
+    stationObjectList.forEach(element => {
+        historyObjectList.push(...generateHistoryObject(element));
+    });
+    return historyObjectList;
+};
+
 module.exports.convertStationsFormat = convertStationsFormat;
+module.exports.generateHistoryObjectList = generateHistoryObjectList;

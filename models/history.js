@@ -6,10 +6,10 @@ const mongoose = require('mongoose');
 
 /***** Genreric varaibles/const *****/
 
-const History = mongoose.model({ collection: 'histories' }, new mongoose.Schema({
+const History = mongoose.model('Histories', new mongoose.Schema({
     station: {
         type: {
-            id : {
+            _id : {
                 type: Number,
                 required: true
             },
@@ -22,7 +22,7 @@ const History = mongoose.model({ collection: 'histories' }, new mongoose.Schema(
     },
     fuel: {
         type: {
-            id : {
+            _id : {
                 type: Number,
                 required: true
             },
@@ -44,7 +44,7 @@ const History = mongoose.model({ collection: 'histories' }, new mongoose.Schema(
                 required: true
             },
         }],
-        default: []
+        // default: []  // arrays are always '[]' by default in mongoose models
     }
 }));
 
