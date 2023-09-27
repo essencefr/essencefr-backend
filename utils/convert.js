@@ -27,6 +27,7 @@ function convertStationFormat(stationRawObject) {
             latitude: stationRawObject.Coordinates.latitude,
             longitude: stationRawObject.Coordinates.longitude
         },
+        lastUpdate: stationRawObject.LastUpdate.value,
         fuels: []
     };
     stationRawObject.Fuels.forEach(element => {

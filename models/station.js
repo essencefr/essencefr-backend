@@ -40,7 +40,8 @@ const Station = mongoose.model('Station', new mongoose.Schema({
             price: { type: Number, required: true }
         }],
         // default: []  // arrays are always '[]' by default in mongoose models
-    }
+    },
+    lastUpdate: { type: Date, required: true }
 }));
 
 /***** Validation functions *****/
@@ -77,7 +78,10 @@ function validateStationRaw(jsonData) {
                     value: Joi.number().required()
                 }),
             })
-        ).sparse()  // allows undefined values inside the array
+        ).sparse(),  // allows undefined values inside the array
+        LastUpdate: Joi.object().required().keys({
+            value: Joi.date().required()
+        })
     });
     return stationRawSchema.validate(jsonData, { allowUnknown: true });  // 'allowUnknown' allows the object to have additional paramaters that are not defined in this schema
 };
