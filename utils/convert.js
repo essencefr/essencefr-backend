@@ -79,7 +79,8 @@ function generateHistoryObject(stationObject) {
                     date: stationObject.fuels[i].date,
                     price: stationObject.fuels[i].price
                 }
-            ]
+            ],
+            lastUpdate: stationObject.fuels[i].date
         };
         historyObjects.push(historyObject);
         historyObject = null;

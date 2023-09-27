@@ -50,7 +50,8 @@ const historySchema = new mongoose.Schema({
             },
         }],
         // default: []  // arrays are always '[]' by default in mongoose models
-    }
+    },
+    lastUpdate: { type: Date, required: true }
 });
 
 // custom static method:

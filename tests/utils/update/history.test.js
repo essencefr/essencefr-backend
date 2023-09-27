@@ -76,6 +76,7 @@ describe('save/update history feature', () => {
             const newFuelName = "New fuel name";
             historyUpdateObject.station.name = newStationName;
             historyUpdateObject.fuel.shortName = newFuelName;
+            historyUpdateObject.newPrice.date.setDate(historyUpdateObject.newPrice.date.getDate() + 1);  // update the date field so that modifications will be taken into consideration by the DB
             await updateHistoryCollection([], [historyUpdateObject]);
             // read DB:
             let doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
@@ -91,6 +92,7 @@ describe('save/update history feature', () => {
             await updateHistoryCollection(historyObjectList, []);
             // update document:
             let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
+            historyUpdateObject.newPrice.date.setDate(historyUpdateObject.newPrice.date.getDate() + 1);  // update the date field so that modifications will be taken into consideration by the DB
             await updateHistoryCollection([], [historyUpdateObject]);
             // read DB:
             doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
@@ -117,6 +119,26 @@ describe('save/update history feature', () => {
             expect(doc.station.name).toBe(newStationName);
             expect(doc.fuel.shortName).toBe(newFuelName);
             expect(doc.history.length).toBe(historyObjectList[0].history.length);
+        });
+
+        test('if date is the "lastUpdate" known in the DB no modification should be made at all', async () => {
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            const historyObjectList = generateHistoryObjectList(stationObjectList);
+            // save document:            
+            await updateHistoryCollection(historyObjectList, []);
+            // update document:
+            let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
+            const newStationName = "New station name";
+            const newFuelName = "New fuel name";
+            historyUpdateObject.station.name = newStationName;
+            historyUpdateObject.fuel.shortName = newFuelName;
+            await updateHistoryCollection([], [historyUpdateObject]);
+            // read DB:
+            let doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
+            expect(doc).toBeDefined();
+            expect(doc.station.name).not.toBe(newStationName);
+            expect(doc.fuel.shortName).not.toBe(newFuelName);
+            expect(doc.history.length).toBe(historyObjectList[0].history.length);  // length unchanged
         });
 
         test('passing updating data with incorrect format should throw', async () => {
