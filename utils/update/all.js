@@ -38,6 +38,12 @@ async function processRawData(stationRawObjectList) {
     const stationObjectListFiltered = await filterStationObjects(stationObjectList);
     const historyObjectsNew = generateHistoryObjectList(stationObjectListFiltered.stationObjectsNew);
     const historyUpdateObjects = generateHistoryUpdateObjectList(stationObjectListFiltered.stationObjectsKnown);
+    
+    // console.log('stationObjectListFiltered.stationObjectsNew: ', stationObjectListFiltered.stationObjectsNew);
+    // console.log('stationObjectListFiltered.stationObjectsKnown: ', stationObjectListFiltered.stationObjectsKnown);
+    // console.log('historyObjectsNew: ', historyObjectsNew);
+    // console.log('historyUpdateObjects: ', historyUpdateObjects);
+
     await runInMongooseTransaction(async (session) => {
         await updateStationsCollection(stationObjectListFiltered.stationObjectsNew, stationObjectListFiltered.stationObjectsKnown, session);
         await updateHistoryCollection(historyObjectsNew, historyUpdateObjects, session);
