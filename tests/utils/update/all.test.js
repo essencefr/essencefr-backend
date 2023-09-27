@@ -10,24 +10,30 @@ const { convertStationsFormat } = require('../../../utils/convert');
 
 
 describe('generic update feature', () => {
+    beforeEach(() => {
+        server = require('../../../index');
+    });
+    afterEach(async () => {
+        server.close();
+    });
+    afterAll(() => {
+        mongoose.disconnect();
+    });
 
     describe('main process', () => {
         test('processing raw data with missing fields should raise an error', async () => {
-            const stationRawObjectList = [
+            const stationRawObjectIncompleteList = [
                 { id: 1, name: 'a' },
             ];
             // ensure that a validation error is thrown:
-            await expect(processRawData(stationRawObjectList)).rejects.toThrow(/validation error/i);
+            await expect(processRawData(stationRawObjectIncompleteList)).rejects.toThrow(/validation error/i);
         });
     });
     
     describe('filter feature', () => {
-        beforeEach(() => { server = require('../../../index'); });
         afterEach( async () => {
-            server.close();
             await Station.deleteMany({});
         });
-        afterAll(() => { mongoose.disconnect(); });
 
         test('an unknown station data object should be correctly filtered as new', async () => {
             const { stationRawObjectList } = require('../../const');
