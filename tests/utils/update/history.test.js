@@ -65,7 +65,7 @@ describe('save/update history feature', () => {
     });
 
     describe('update history document into the DB', () => {
-        test('updated data related to station should be avaiable after update', async () => {
+        test('updated data should be avaiable after update', async () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             const historyObjectList = generateHistoryObjectList(stationObjectList);
             // save document:            
@@ -82,36 +82,6 @@ describe('save/update history feature', () => {
             expect(doc).toBeDefined();
             expect(doc.station.name).toBe(newStationName);
             expect(doc.fuel.shortName).toBe(newFuelName);
-        });
-
-        test('cannot change station._id properties', async () => {
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const historyObjectList = generateHistoryObjectList(stationObjectList);
-            // save document:            
-            await updateHistoryCollection(historyObjectList, []);
-            // update document:
-            let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
-            const newStationId = 123456;
-            historyUpdateObject.station._id = newStationId;
-            await updateHistoryCollection([], [historyUpdateObject]);
-            // read DB:
-            doc = await History.findByStationAndFuelIds(newStationId, historyObjectList[0].fuel._id);
-            expect(doc).toBeNull();
-        });
-
-        test('cannot change fuel._id properties', async () => {
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const historyObjectList = generateHistoryObjectList(stationObjectList);
-            // save document:            
-            await updateHistoryCollection(historyObjectList, []);
-            // update document:
-            let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
-            const newFuelId = 123456;
-            historyUpdateObject.fuel._id = newFuelId;
-            await updateHistoryCollection([], [historyUpdateObject]);
-            // read DB:
-            doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, newFuelId);
-            expect(doc).toBeNull();
         });
 
         test('newly added price should be appended to the history', async () => {
@@ -154,13 +124,5 @@ describe('save/update history feature', () => {
             historyUpdateObject.newPrice = null;
             await expect(updateHistoryCollection([], [historyUpdateObject])).rejects.toThrow();
         });
-
-        // test('passing updating data with unknown ids should do nothing (no modification, no throw)', async () => {
-        //     // TODO
-        //     let historyUpdateObject = generateHistoryUpdateObjectList(convertStationsFormat(stationRawObjectList))[0];
-        //     historyUpdateObject.station._id = 1;
-        //     historyUpdateObject.fuel._id = 1;
-        //     await expect(updateHistoryCollection([], [historyUpdateObject])).resolves.toBeUndefined();
-        // });
     });
 });

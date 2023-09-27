@@ -14,7 +14,8 @@ const historySchema = new mongoose.Schema({
         type: {
             _id : {
                 type: Number,
-                required: true
+                required: true,
+                immutable: true
             },
             name: {
                 type: String,
@@ -27,7 +28,8 @@ const historySchema = new mongoose.Schema({
         type: {
             _id : {
                 type: Number,
-                required: true
+                required: true,
+                immutable: true
             },
             shortName: {
                 type: String,

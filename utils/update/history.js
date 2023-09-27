@@ -32,6 +32,7 @@ async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToU
                 filter: {
                     'station._id': historyObjectsToUpdate[i].station._id,
                     'fuel._id': historyObjectsToUpdate[i].fuel._id
+                    // or just : _id: parseInt(`${historyObjectsToUpdate[i].station._id}${historyObjectsToUpdate[i].fuel._id}`) (which filter is faster ? -> analysis TODO)
                 },
                 update: {
                     $set: { 'station.name': historyObjectsToUpdate[i].station.name,
