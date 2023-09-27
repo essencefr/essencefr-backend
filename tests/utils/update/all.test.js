@@ -12,14 +12,12 @@ const { convertStationsFormat } = require('../../../utils/convert');
 describe('generic update feature', () => {
 
     describe('main process', () => {
-        test('processing raw data with missing fields should raise an error', () => {
+        test('processing raw data with missing fields should raise an error', async () => {
             const stationRawObjectList = [
                 { id: 1, name: 'a' },
             ];
             // ensure that a validation error is thrown:
-            expect(() => {
-                processRawData(stationRawObjectList);
-            }).toThrow(/validation error/i);
+            await expect(processRawData(stationRawObjectList)).rejects.toThrow(/validation error/i);
         });
     });
     

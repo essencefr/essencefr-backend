@@ -3,15 +3,17 @@
  */
 
 
-const { convertStationsFormat } = require('../convert');
 const { Station } = require('../../models/station');
+const { convertStationsFormat, generateHistoryObjectList, generateHistoryUpdateObjectList } = require('../convert');
+const { runInMongooseTransaction } = require('../transactions');
+const { updateHistoryCollection } = require('./history');
+const { updateStationsCollection } = require('./stations');
 
 /**
  * Takes stations raw data and save/update documents in the DB
  * @param {Array<Object>} stationRawObjectList raw data provided by the gov API
  */
-function processRawData(stationRawObjectList) {
-    const stationObjectList = convertStationsFormat(stationRawObjectList);
+async function processRawData(stationRawObjectList) {
     // TODO:
     // 
     // # GENERIC:
@@ -30,20 +32,16 @@ function processRawData(stationRawObjectList) {
     // # BRANDS:
     // From all the station objects (no separation here), insert a new brand object in the matching collection if it does not exist yet
     // 
-    // ----- OLD BELOW -----
-    // get all stations in stationObjectList with _id unknown in the database: store them in an array (let's say 'stationObjectListNew')
-    //  -> save stations data into stations documents in the DB: call saveStations(stationObjectListNew)
-    //  -> create matching history documents and save prices data in it
-    //  -> is the brand unknown ? -> if yes, create new document into the brands collection
-    //  -> is the fuel unknown ? -> if yes, create new document into the fuels collection
-    // get all stations in stationObjectList with _id already known in the database: store them in an array (let's say 'stationObjectListKnown')
-    // get all stations that have data different from the one in the DB (let's say 'stationObjectListToUpdate'). This can be achieved by comparing hash values
-    //  -> update the corresponding documents into the DB: call updateStations(stationObjectListToUpdate)
-    //  -> store fuel prices into matching history document
-    // ----- OLD END -----
-    //
     // Improvment idea: the lists of known/unkown stations' _id values can be stored in cache and only actualized when new station documents are created in order to improve performance
     //                  -> no need to execute a query on the DB when it is rare that a new station is being discovered
+    const stationObjectList = convertStationsFormat(stationRawObjectList);
+    const stationObjectListFiltered = await filterStationObjects(stationObjectList);
+    const historyObjectsNew = generateHistoryObjectList(stationObjectListFiltered.stationObjectsNew);
+    const historyUpdateObjects = generateHistoryUpdateObjectList(stationObjectListFiltered.stationObjectsKnown);
+    await runInMongooseTransaction(async (session) => {
+        await updateStationsCollection(stationObjectListFiltered.stationObjectsNew, stationObjectListFiltered.stationObjectsKnown, session);
+        await updateHistoryCollection(historyObjectsNew, historyUpdateObjects, session);
+    });
 };
 
 /**
