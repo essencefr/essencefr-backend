@@ -29,7 +29,8 @@ async function updateStationsCollection(stationObjectsToInsert, stationObjectsTo
         bulkOperations.push({
             updateOne:
                 {
-                    filter: { _id: stationObjectsToUpdate[i]._id },
+                    filter: { _id: stationObjectsToUpdate[i]._id,
+                              lastUpdate: { $ne: stationObjectsToUpdate[i].lastUpdate } },
                     update: { $set: stationObjectsToUpdate[i] }
                 }
         });

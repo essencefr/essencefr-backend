@@ -70,6 +70,8 @@ describe('save/update station feature', () => {
             await updateStationsCollection([stationObject], []);  // insert document into DB
             const newStationName = "New station name";
             stationObject.name = newStationName;
+            stationObject.lastUpdate = new Date(stationObject.lastUpdate);
+            stationObject.lastUpdate.setDate(stationObject.lastUpdate.getDate() + 1);  // update the field 'lastUpdate' so that modifications will be taken into consideration by the DB
             await updateStationsCollection([], [stationObject]);  // update documents
             // read DB:
             const doc = await Station.findById(stationObject._id);
@@ -77,6 +79,21 @@ describe('save/update station feature', () => {
             expect(doc).not.toBeNull();
             expect(doc._id).toEqual(stationId);
             expect(doc.name).toEqual(newStationName);
+        });
+
+        test('no update should be made if the last update date has not changed', async () => {
+            let stationObject = convertStationsFormat(stationRawObjectList)[0];
+            const stationId = stationObject._id;
+            await updateStationsCollection([stationObject], []);  // insert document into DB
+            const newStationName = "New station name";
+            stationObject.name = newStationName;
+            await updateStationsCollection([], [stationObject]);  // update documents
+            // read DB:
+            const doc = await Station.findById(stationObject._id);
+            // compare results:
+            expect(doc).not.toBeNull();
+            expect(doc._id).toEqual(stationId);
+            expect(doc.name).not.toEqual(newStationName);
         });
     });
 });
