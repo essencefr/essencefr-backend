@@ -81,8 +81,6 @@ describe('generic update feature', () => {
             await processRawData([stationRawObject]);
             // update object:
             const stationRawObjectUpdated = stationRawObjectListUpdated[0];
-            stationRawObjectUpdated.LastUpdate.value = new Date(stationRawObjectUpdated.LastUpdate.value);
-            stationRawObjectUpdated.LastUpdate.value.setDate(stationRawObjectUpdated.LastUpdate.value.getDate() + 1);  // update the field 'lastUpdate' so that modifications will be taken into consideration by the DB
             // process new raw data:
             await processRawData([stationRawObjectUpdated]);
             // ensure station doc has been modified in the DB:

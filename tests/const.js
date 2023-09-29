@@ -154,7 +154,7 @@ const stationRawObjectListUpdated = [
             }
         ],
         "LastUpdate": {
-            "value": "2023-09-18T07:26:16Z",
+            "value": "2023-09-12T07:26:16Z",  // [updated value]
             "text": "18/09/2023 07:26:16"
         },
         "distance": 1845,
