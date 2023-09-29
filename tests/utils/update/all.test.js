@@ -292,24 +292,4 @@ describe('generic update feature', () => {
             expect(1).toBe(1);
         });
     });
-
-    describe('filter feature', () => {
-        test('an unknown station data object should be correctly filtered as new', async () => {
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const stationObjectListFiltered = await filterStationObjects(stationObjectList);
-            expect(stationObjectListFiltered).toBeDefined();
-            expect(stationObjectListFiltered.stationObjectsNew.length).toBe(1);
-            expect(stationObjectListFiltered.stationObjectsKnown.length).toBe(0);
-        });
-
-        test('an already known station data object should be correctly filtered as known', async () => {
-            const { updateStationsCollection } = require('../../../utils/update/stations');
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            await updateStationsCollection(stationObjectList, []);
-            const stationObjectListFiltered = await filterStationObjects(stationObjectList);
-            expect(stationObjectListFiltered).toBeDefined();
-            expect(stationObjectListFiltered.stationObjectsNew.length).toBe(0);
-            expect(stationObjectListFiltered.stationObjectsKnown.length).toBe(1);
-        });
-    });
 });

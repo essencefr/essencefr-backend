@@ -3,6 +3,7 @@
  */
 
 const cache = require('../../cache/cache');
+const { filterKnownObjects } = require('../filter');
 const { convertStationsFormat, generateHistoryObjectList } = require('../convert');
 const { runInNewMongooseTransaction } = require('../transactions');
 const { updateHistoryCollection } = require('./history');
@@ -31,12 +32,12 @@ async function processRawData(stationRawObjectList) {
     // # BRANDS:
     // From all the station objects (no separation here), insert a new brand object in the matching collection if it does not exist yet
     // 
-    // Improvment idea: the lists of known/unkown stations' _id values can be stored in cache and only actualized when new station documents are created in order to improve performance
-    //                  -> no need to execute a query on the DB when it is rare that a new station is being discovered
     const stationObjectList = convertStationsFormat(stationRawObjectList);
-    const stationObjectListFiltered = await filterStationObjects(stationObjectList);
+    const listKnownStationIds = await cache.getKnownStationIds();
+    const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
     const historyObjectsList = generateHistoryObjectList(stationObjectList);
-    const historyObjectListFiltered = await filterHistoryObjects(historyObjectsList);
+    const listKnownHistoryIds = await cache.getKnownHistoryIds();
+    const historyObjectListFiltered = filterKnownObjects(historyObjectsList, listKnownHistoryIds);
 
     // console.log('stationObjectListFiltered.stationObjectsNew: ', stationObjectListFiltered.stationObjectsNew);
     // console.log('stationObjectListFiltered.stationObjectsKnown: ', stationObjectListFiltered.stationObjectsKnown);
@@ -44,60 +45,9 @@ async function processRawData(stationRawObjectList) {
     // console.log('historyUpdateObjects: ', historyUpdateObjects);
 
     await runInNewMongooseTransaction(async (session) => {
-        await updateStationsCollection(stationObjectListFiltered.stationObjectsNew, stationObjectListFiltered.stationObjectsKnown, session);
-        await updateHistoryCollection(historyObjectListFiltered.historyObjectsNew, historyObjectListFiltered.historyObjectsKnown, session);
+        await updateStationsCollection(stationObjectListFiltered.objectsNew, stationObjectListFiltered.objectsKnown, session);
+        await updateHistoryCollection(historyObjectListFiltered.objectsNew, historyObjectListFiltered.objectsKnown, session);
     });
-};
-
-/**
- * Separate a stationObjectList in two arrays:
- *  - one containing the station objects unknown by the DB
- *  - one containing the station objects already known in the DB
- * @param {Array<Object>} stationObjectList list of station objects matching the mongoose schema defined in models
- */
-async function filterStationObjects(stationObjectList) {
-    // look for the station ids already in the database through cache:
-    const listKnownStationIds = await cache.getKnownStationIds();
-    // create output:
-    let stationObjectsFiltered = {
-        stationObjectsNew: [],      // stations object with _id unknown in the DB
-        stationObjectsKnown: []     // stations object with _id already known in the DB
-    };
-    // filter elements:
-    stationObjectList.forEach((stationObject) => {
-        if (listKnownStationIds.includes(stationObject._id)) {     // i.e. if stationObject._id is in the list of ids known by the DB
-            stationObjectsFiltered.stationObjectsKnown.push(stationObject);
-        } else {
-            stationObjectsFiltered.stationObjectsNew.push(stationObject);
-        };
-    });
-    return stationObjectsFiltered;
-};
-
-/**
- * Separate a historyObjectList in two arrays:
- *  - one containing the history objects unknown by the DB
- *  - one containing the history objects already known in the DB
- * @param {Array<Object>} historyObjectList list of history objects matching the mongoose schema defined in models
- */
-async function filterHistoryObjects(historyObjectList) {
-    // look for the history ids already in the database through cache:
-    const listKnownHistoryIds = await cache.getKnownHistoryIds();
-    // create output:
-    let historyObjectsFiltered = {
-        historyObjectsNew: [],      // history object with _id unknown in the DB
-        historyObjectsKnown: []     // history object with _id already known in the DB
-    };
-    // filter elements:
-    historyObjectList.forEach((historyObject) => {
-        if (listKnownHistoryIds.includes(historyObject._id)) {     // i.e. if historyObject._id is in the list of ids known by the DB
-            historyObjectsFiltered.historyObjectsKnown.push(historyObject);
-        } else {
-            historyObjectsFiltered.historyObjectsNew.push(historyObject);
-        };
-    });
-    return historyObjectsFiltered;
 };
 
 module.exports.processRawData = processRawData;
-module.exports.filterStationObjects = filterStationObjects;
