@@ -9,18 +9,23 @@ const { updateStationsCollection } = require('../../../utils/update/stations');
 const { convertStationsFormat } = require('../../../utils/convert');
 
 let server = null;
+let cache = null;
 
 // main test suite:
 describe('save/update station feature', () => {
+    beforeAll(() => {
+        cache = require('../../../cache/cache');
+    });
     beforeEach(() => {
         server = require('../../../index');
     });
     afterEach(async () => {
+        cache.flushAll();
         server.close();
         await Station.deleteMany({});
     });
-    afterAll(() => {
-        mongoose.disconnect();
+    afterAll(async () => {
+        await mongoose.disconnect();
     });
 
     describe('insert station data into database', () => {
@@ -44,6 +49,7 @@ describe('save/update station feature', () => {
             const doc = await Station.findById(stationObject._id);
             // compare results:
             expect(doc).toBeNull();
+            expect([[], undefined]).toContain(cache.get('knownStationIds'));
         });
 
         test('saving no converted raw data should raise an error', async () => {

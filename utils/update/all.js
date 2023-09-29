@@ -2,7 +2,7 @@
  * Wrapper called to save/update the raw data into the different collections
  */
 
-
+const cache = require('../../cache/cache');
 const { Station } = require('../../models/station');
 const { convertStationsFormat, generateHistoryObjectList, generateHistoryUpdateObjectList } = require('../convert');
 const { runInMongooseTransaction } = require('../transactions');
@@ -38,7 +38,7 @@ async function processRawData(stationRawObjectList) {
     const stationObjectListFiltered = await filterStationObjects(stationObjectList);
     const historyObjectsNew = generateHistoryObjectList(stationObjectListFiltered.stationObjectsNew);
     const historyUpdateObjects = generateHistoryUpdateObjectList(stationObjectListFiltered.stationObjectsKnown);
-    
+
     // console.log('stationObjectListFiltered.stationObjectsNew: ', stationObjectListFiltered.stationObjectsNew);
     // console.log('stationObjectListFiltered.stationObjectsKnown: ', stationObjectListFiltered.stationObjectsKnown);
     // console.log('historyObjectsNew: ', historyObjectsNew);
@@ -62,8 +62,8 @@ async function filterStationObjects(stationObjectList) {
     stationObjectList.forEach((stationObject) => {
         listInputStationIds.push(stationObject._id);
     });
-    // look for the stations already in the database:
-    const listKnownStationIds = await Station.find({ '_id': {$in: listInputStationIds}}).select('_id');  // TODO Improvment idea: this list can be stored in cache and only actualized when new station documents are created in order to improve performance
+    // look for the station ids already in the database through cache:
+    const listKnownStationIds = await cache.getKnownStationIds();
     // create output:
     let stationObjectsFiltered = {
         stationObjectsNew: [],      // stations object with _id unknown in the DB
@@ -71,9 +71,9 @@ async function filterStationObjects(stationObjectList) {
     };
     // filter elements:
     stationObjectList.forEach((stationObject) => {
-        if(listKnownStationIds.some(e => e._id == stationObject._id)) {     // i.e. if stationObject._id is in the list of ids known by the DB
+        if (listKnownStationIds.includes(stationObject._id)) {     // i.e. if stationObject._id is in the list of ids known by the DB
             stationObjectsFiltered.stationObjectsKnown.push(stationObject);
-        } else {            
+        } else {
             stationObjectsFiltered.stationObjectsNew.push(stationObject);
         };
     });

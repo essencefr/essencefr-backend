@@ -88,7 +88,13 @@ const stationRawObjectListUpdated = [
     }
 ];
 
+let server = null;
+let cache = null;
+
 describe('generic update feature', () => {
+    beforeAll(() => {
+        cache = require('../../../cache/cache');
+    });
     beforeEach(() => {
         server = require('../../../index');
     });
@@ -96,11 +102,13 @@ describe('generic update feature', () => {
         await Station.deleteMany({});
         await History.deleteMany({});
         server.close();
+        cache.flushAll();
     });
     afterAll(async () => {
-        mongoose.disconnect();
+        await mongoose.disconnect();
     });
 
+    
     describe('main process', () => {
         test('processing raw data with missing fields should raise an error', async () => {
             const stationRawObjectIncompleteList = [
@@ -197,7 +205,7 @@ describe('generic update feature', () => {
                 expect(doc.history[1].date.toString()).toEqual(new Date(stationRawObjectUpdated.Fuels[i].Update.value).toString());
             };
         });
-
+        
         test('a fuel removed from a station should not impact the matching history document', async () => {
             const stationRawObject = stationRawObjectList[0];  // only consider the first stationRawObject for this test
             // process raw data to fill up the DB:
@@ -231,7 +239,7 @@ describe('generic update feature', () => {
                 };
             };
         });
-
+        
         /*
         test('a fuel added to a station should cause the creation of a new history document', async () => {
             const stationRawObject = stationRawObjectList[0];  // only consider the first stationRawObject for this test
@@ -284,7 +292,7 @@ describe('generic update feature', () => {
             expect(1).toBe(1);
         });
     });
-    
+
     describe('filter feature', () => {
         test('an unknown station data object should be correctly filtered as new', async () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);

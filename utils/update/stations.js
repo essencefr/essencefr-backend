@@ -2,6 +2,7 @@
  * Code called to update values in the database
  */
 
+const cache = require('../../cache/cache');
 const { Station } = require("../../models/station");
 const { runInMongooseTransaction } = require('../transactions');
 
@@ -15,8 +16,10 @@ async function updateStationsCollection(stationObjectsToInsert, stationObjectsTo
     if (typeof stationObjectsToInsert == 'undefined') throw Error(`You should provide a 'stationObjectsToInsert' parameter. Given: '${stationObjectsToInsert}'`);
     if (typeof stationObjectsToUpdate == 'undefined') throw Error(`You should provide a 'stationObjectsToUpdate' parameter. Given: '${stationObjectsToUpdate}'`);
     let bulkOperations = [];
+    let listKnownStationIds = [];
     // insert operations:
     for(let i=0; i < stationObjectsToInsert.length; i++) {
+        listKnownStationIds.push(stationObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne:
                 {
@@ -38,10 +41,14 @@ async function updateStationsCollection(stationObjectsToInsert, stationObjectsTo
     // execute:
     // save the data within a transaction so that no data will be stored if an _id already exists:
     if(session) {  // i.e. a transaction has already been initialized
-        await Station.bulkWrite(bulkOperations, { session });
+        const bulkWriteResult = await Station.bulkWrite(bulkOperations, { session });
+        // update cache only if the 'bulkWrite' operation completes without error
+        if (bulkWriteResult.ok) cache.pushInKnownStationIds(listKnownStationIds);
     } else {
         await runInMongooseTransaction(async (session) => {
-            await Station.bulkWrite(bulkOperations, { session });
+            const bulkWriteResult = await Station.bulkWrite(bulkOperations, { session });
+            // update cache only if the 'bulkWrite' operation completes without error
+            if (bulkWriteResult.ok) cache.pushInKnownStationIds(listKnownStationIds);
         });
     };
 };
