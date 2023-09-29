@@ -3,9 +3,8 @@
  */
 
 const cache = require('../../cache/cache');
-const { Station } = require('../../models/station');
 const { convertStationsFormat, generateHistoryObjectList, generateHistoryUpdateObjectList } = require('../convert');
-const { runInMongooseTransaction } = require('../transactions');
+const { runInNewMongooseTransaction } = require('../transactions');
 const { updateHistoryCollection } = require('./history');
 const { updateStationsCollection } = require('./stations');
 
@@ -44,7 +43,7 @@ async function processRawData(stationRawObjectList) {
     // console.log('historyObjectsNew: ', historyObjectsNew);
     // console.log('historyUpdateObjects: ', historyUpdateObjects);
 
-    await runInMongooseTransaction(async (session) => {
+    await runInNewMongooseTransaction(async (session) => {
         await updateStationsCollection(stationObjectListFiltered.stationObjectsNew, stationObjectListFiltered.stationObjectsKnown, session);
         await updateHistoryCollection(historyObjectsNew, historyUpdateObjects, session);
     });

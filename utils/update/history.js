@@ -44,15 +44,10 @@ async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToU
             }
         });
     };
-    // execute:
     // save the data within a transaction so that no data will be stored if an _id already exists:
-    if(session) {  // i.e. a transaction has already been initialized
+    await runInMongooseTransaction(session, async (session) => {
         await History.bulkWrite(bulkOperations, { session });
-    } else {
-        await runInMongooseTransaction(async (session) => {
-            await History.bulkWrite(bulkOperations, { session });
-        });
-    };
+    });
 };
 
 module.exports.updateHistoryCollection = updateHistoryCollection;

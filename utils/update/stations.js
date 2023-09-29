@@ -38,19 +38,12 @@ async function updateStationsCollection(stationObjectsToInsert, stationObjectsTo
                 }
         });
     };
-    // execute:
     // save the data within a transaction so that no data will be stored if an _id already exists:
-    if(session) {  // i.e. a transaction has already been initialized
+    await runInMongooseTransaction(session, async (session) => {
         const bulkWriteResult = await Station.bulkWrite(bulkOperations, { session });
         // update cache only if the 'bulkWrite' operation completes without error
         if (bulkWriteResult.ok) cache.pushInKnownStationIds(listKnownStationIds);
-    } else {
-        await runInMongooseTransaction(async (session) => {
-            const bulkWriteResult = await Station.bulkWrite(bulkOperations, { session });
-            // update cache only if the 'bulkWrite' operation completes without error
-            if (bulkWriteResult.ok) cache.pushInKnownStationIds(listKnownStationIds);
-        });
-    };
+    });
 };
 
 module.exports.updateStationsCollection = updateStationsCollection;
