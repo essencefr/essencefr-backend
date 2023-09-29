@@ -78,7 +78,7 @@ function validateHistoryUpdate(object) {
             _id: Joi.number().required(),
             shortName: Joi.string().required()
         }),
-        newPrice: Joi.object().keys({
+        newPrice: Joi.object().required().keys({
             price: Joi.number().required(),
             date: Joi.date().required()
         })

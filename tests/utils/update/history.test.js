@@ -100,27 +100,6 @@ describe('save/update history feature', () => {
             expect(doc.history.length).toBe(2);
         });
 
-        test('if no new price then no price data should be added to the history but other modifications should be applied', async () => {
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const historyObjectList = generateHistoryObjectList(stationObjectList);
-            // save document:            
-            await updateHistoryCollection(historyObjectList, []);
-            // update document:
-            let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
-            const newStationName = "New station name";
-            const newFuelName = "New fuel name";
-            historyUpdateObject.station.name = newStationName;
-            historyUpdateObject.fuel.shortName = newFuelName;
-            delete historyUpdateObject.newPrice;
-            await updateHistoryCollection([], [historyUpdateObject]);
-            // read DB:
-            let doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
-            expect(doc).toBeDefined();
-            expect(doc.station.name).toBe(newStationName);
-            expect(doc.fuel.shortName).toBe(newFuelName);
-            expect(doc.history.length).toBe(historyObjectList[0].history.length);
-        });
-
         test('if date is the "lastUpdate" known in the DB no modification should be made at all', async () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             const historyObjectList = generateHistoryObjectList(stationObjectList);

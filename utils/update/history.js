@@ -27,26 +27,20 @@ async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToU
     for (let i = 0; i < historyObjectsToUpdate.length; i++) {
         const { error } = validateHistoryUpdate(historyObjectsToUpdate[i]);
         if (error) throw Error(`Validation error: ${error.details[0].message}`);
-        // updateOne operation parameters:
-        let filter = {
-            'station._id': historyObjectsToUpdate[i].station._id,
-            'fuel._id': historyObjectsToUpdate[i].fuel._id
-            // or just : _id: parseInt(`${historyObjectsToUpdate[i].station._id}${historyObjectsToUpdate[i].fuel._id}`) (which filter is faster ? -> analysis TODO)
-        };
-        let update = {
-            $set: { 'station.name': historyObjectsToUpdate[i].station.name,
-                    'fuel.shortName': historyObjectsToUpdate[i].fuel.shortName }
-        };
-        // add elements to operation parameters if historyUpdateObject has a newPrice field:
-        if (historyObjectsToUpdate[i].newPrice) {
-            filter.lastUpdate = { $ne: historyObjectsToUpdate[i].newPrice.date };
-            update.$push = { history: historyObjectsToUpdate[i].newPrice }
-        };
         // push updateOne operation in the array:
         bulkOperations.push({
             updateOne: {
-                filter: filter,
-                update: update
+                filter: {
+                    'station._id': historyObjectsToUpdate[i].station._id,
+                    'fuel._id': historyObjectsToUpdate[i].fuel._id,
+                    // or just : _id: parseInt(`${historyObjectsToUpdate[i].station._id}${historyObjectsToUpdate[i].fuel._id}`) (which filter is faster ? -> analysis TODO)
+                    lastUpdate: { $ne: historyObjectsToUpdate[i].newPrice.date }
+                },
+                update: {
+                    $set: { 'station.name': historyObjectsToUpdate[i].station.name,
+                            'fuel.shortName': historyObjectsToUpdate[i].fuel.shortName },
+                    $push: { history: historyObjectsToUpdate[i].newPrice }
+                }
             }
         });
     };
