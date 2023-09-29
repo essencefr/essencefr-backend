@@ -24,8 +24,8 @@ describe('save/update station feature', () => {
         server.close();
         await Station.deleteMany({});
     });
-    afterAll(async () => {
-        await mongoose.disconnect();
+    afterAll(() => {
+        mongoose.disconnect();
     });
 
     describe('insert station data into database', () => {

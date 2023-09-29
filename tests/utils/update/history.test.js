@@ -5,7 +5,7 @@
 const mongoose = require('mongoose');
 const { History } = require('../../../models/history');
 const { stationRawObjectList } = require('../../const');
-const { convertStationsFormat, generateHistoryObjectList, generateHistoryUpdateObjectList } = require('../../../utils/convert');
+const { convertStationsFormat, generateHistoryObjectList } = require('../../../utils/convert');
 const { updateHistoryCollection } = require('../../../utils/update/history');
 
 
@@ -20,8 +20,8 @@ describe('save/update history feature', () => {
         server.close();
         await History.deleteMany({});
     });
-    afterAll(async () => {
-        await mongoose.disconnect();
+    afterAll(() => {
+        mongoose.disconnect();
     });
 
     describe('insert history document into the DB', () => {
@@ -67,63 +67,67 @@ describe('save/update history feature', () => {
     describe('update history document into the DB', () => {
         test('updated data should be avaiable after update', async () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const historyObjectList = generateHistoryObjectList(stationObjectList);
+            let historyObjectList = generateHistoryObjectList(stationObjectList);
             // save document:            
             await updateHistoryCollection(historyObjectList, []);
             // update document:
-            let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
             const newStationName = "New station name";
             const newFuelName = "New fuel name";
-            historyUpdateObject.station.name = newStationName;
-            historyUpdateObject.fuel.shortName = newFuelName;
-            historyUpdateObject.newPrice.date.setDate(historyUpdateObject.newPrice.date.getDate() + 1);  // update the date field so that modifications will be taken into consideration by the DB
-            await updateHistoryCollection([], [historyUpdateObject]);
+            const newPriceValue = 1.111;
+            historyObjectList[0].station.name = newStationName;
+            historyObjectList[0].fuel.shortName = newFuelName;
+            historyObjectList[0].history[0].price = newPriceValue;
+            // update the date fields so that modifications will be taken into consideration by the DB:
+            let newPriceDate = new Date(historyObjectList[0].history[0].date);
+            newPriceDate.setDate(newPriceDate.getDate() +1);  // add a day
+            historyObjectList[0].history[0].date = newPriceDate;
+            historyObjectList[0].lastUpdate = newPriceDate;
+            await updateHistoryCollection([], historyObjectList);
             // read DB:
             let doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
             expect(doc).toBeDefined();
             expect(doc.station.name).toBe(newStationName);
             expect(doc.fuel.shortName).toBe(newFuelName);
-        });
-
-        test('newly added price should be appended to the history', async () => {
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const historyObjectList = generateHistoryObjectList(stationObjectList);
-            // save document:            
-            await updateHistoryCollection(historyObjectList, []);
-            // update document:
-            let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
-            historyUpdateObject.newPrice.date.setDate(historyUpdateObject.newPrice.date.getDate() + 1);  // update the date field so that modifications will be taken into consideration by the DB
-            await updateHistoryCollection([], [historyUpdateObject]);
-            // read DB:
-            doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
-            expect(doc).toBeDefined();
             expect(doc.history.length).toBe(2);
+            expect(doc.history[1].price).toBe(newPriceValue);
+            expect(new Date(doc.history[1].date)).toEqual(new Date(newPriceDate));
+            expect(new Date(doc.lastUpdate)).toEqual(new Date(newPriceDate));
         });
 
-        test('if date is the "lastUpdate" known in the DB no modification should be made at all', async () => {
+        test("if date is the 'lastUpdate' known in the DB no modification should be made at all", async () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
-            const historyObjectList = generateHistoryObjectList(stationObjectList);
+            let historyObjectList = generateHistoryObjectList(stationObjectList);
             // save document:            
             await updateHistoryCollection(historyObjectList, []);
             // update document:
-            let historyUpdateObject = generateHistoryUpdateObjectList(stationObjectList)[0];
             const newStationName = "New station name";
             const newFuelName = "New fuel name";
-            historyUpdateObject.station.name = newStationName;
-            historyUpdateObject.fuel.shortName = newFuelName;
-            await updateHistoryCollection([], [historyUpdateObject]);
+            historyObjectList[0].station.name = newStationName;
+            historyObjectList[0].fuel.shortName = newFuelName;
+            await updateHistoryCollection([], historyObjectList);
             // read DB:
             let doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
             expect(doc).toBeDefined();
-            expect(doc.station.name).not.toBe(newStationName);
-            expect(doc.fuel.shortName).not.toBe(newFuelName);
+            expect(doc.station.name).not.toBe(newStationName);  // name unchanged
+            expect(doc.fuel.shortName).not.toBe(newFuelName);  // name unchanged
             expect(doc.history.length).toBe(historyObjectList[0].history.length);  // length unchanged
         });
 
         test('passing updating data with incorrect format should throw', async () => {
-            let historyUpdateObject = generateHistoryUpdateObjectList(convertStationsFormat(stationRawObjectList))[0];
-            historyUpdateObject.newPrice = null;
-            await expect(updateHistoryCollection([], [historyUpdateObject])).rejects.toThrow();
+            let historyObjectList = generateHistoryObjectList(convertStationsFormat(stationRawObjectList));
+            historyObjectList[0].history[0].price = "a string";
+            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow();
+        });
+
+        test("passing updating data with empty 'history' array should throw", async () => {
+            let historyObjectList = generateHistoryObjectList(convertStationsFormat(stationRawObjectList));
+            historyObjectList[0].history = [];
+            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow();
+        });
+
+        test("passing updating data with 'lastUpdate' != 'history[-1].date' should throw", async () => {
+            // TODO
+            expect(0).toBe(1);
         });
     });
 });

@@ -12,16 +12,12 @@ let server = null;
 
 // main test suite:
 describe('/api/stations', () => {
-    beforeEach(() => {
-        server = require('../../index');
-    });
+    beforeEach(() => { server = require('../../index'); });
     afterEach( async () => {
         server.close();
         await Station.deleteMany({});
     });
-    afterAll(async () => {
-        await mongoose.disconnect();
-    });
+    afterAll(() => { mongoose.disconnect(); });
 
     describe('GET /:id', () => {
         test('should return the station when id is correct', async () => {

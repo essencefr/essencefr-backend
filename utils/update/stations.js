@@ -16,10 +16,10 @@ async function updateStationsCollection(stationObjectsToInsert, stationObjectsTo
     if (typeof stationObjectsToInsert == 'undefined') throw Error(`You should provide a 'stationObjectsToInsert' parameter. Given: '${stationObjectsToInsert}'`);
     if (typeof stationObjectsToUpdate == 'undefined') throw Error(`You should provide a 'stationObjectsToUpdate' parameter. Given: '${stationObjectsToUpdate}'`);
     let bulkOperations = [];
-    let listKnownStationIds = [];
+    let listNewStationIds = [];
     // insert operations:
     for(let i=0; i < stationObjectsToInsert.length; i++) {
-        listKnownStationIds.push(stationObjectsToInsert[i]._id);
+        listNewStationIds.push(stationObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne:
                 {
@@ -42,7 +42,7 @@ async function updateStationsCollection(stationObjectsToInsert, stationObjectsTo
     await runInMongooseTransaction(session, async (session) => {
         const bulkWriteResult = await Station.bulkWrite(bulkOperations, { session });
         // update cache only if the 'bulkWrite' operation completes without error
-        if (bulkWriteResult.ok) cache.pushInKnownStationIds(listKnownStationIds);
+        if (bulkWriteResult.ok) cache.pushInKnownStationIds(listNewStationIds);
     });
 };
 

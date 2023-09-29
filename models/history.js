@@ -12,7 +12,7 @@ const historySchema = new mongoose.Schema({
     _id: { type: Number, required: true },
     station: {
         type: {
-            _id : {
+            _id: {
                 type: Number,
                 required: true,
                 immutable: true
@@ -26,7 +26,7 @@ const historySchema = new mongoose.Schema({
     },
     fuel: {
         type: {
-            _id : {
+            _id: {
                 type: Number,
                 required: true,
                 immutable: true
@@ -49,42 +49,31 @@ const historySchema = new mongoose.Schema({
                 required: true
             },
         }],
-        // default: []  // arrays are always '[]' by default in mongoose models
+        required: true,
+        // default: [],  // arrays are always '[]' by default in mongoose models
+        // custom validators:
+        validate: [
+            {
+                validator: function (v) { return v.length >= 1; },
+                message: function (props) { return `${props.path} must have length >= 1, got '${props.value}'`; }
+            },
+            // {
+            //     validator: function (v) { return v[v.length].date == this.lastUpdate; },
+            //     message: function (props) { return `Date of last element in ${props.path} must match 'lastUpdate', got '${props.value}' nas 'lastUpdate'='${this.lastUpdate}'`; }
+            // }
+        ]
     },
-    lastUpdate: { type: Date, required: true }
+    lastUpdate: {
+        type: Date,
+        required: true
+    }
 });
 
 // custom static method:
-historySchema.static('findByStationAndFuelIds', function(stationId, fuelId) {
+historySchema.static('findByStationAndFuelIds', function (stationId, fuelId) {
     return this.findById(parseInt(`${stationId}${fuelId}`));
 });
 
 const History = mongoose.model('Histories', historySchema);
 
-/***** Validation functions *****/
-
-/**
- * Ensure that object given has the required format to be passed to the DB-update function
- * This format is called historyUpdateObject
- * @param {Object} object 
- */
-function validateHistoryUpdate(object) {
-    const historyUpdateSchema = Joi.object({
-        station: Joi.object().required().keys({
-            _id: Joi.number().required(),
-            name: Joi.string().required()
-        }),
-        fuel: Joi.object().required().keys({
-            _id: Joi.number().required(),
-            shortName: Joi.string().required()
-        }),
-        newPrice: Joi.object().required().keys({
-            price: Joi.number().required(),
-            date: Joi.date().required()
-        })
-    });
-    return historyUpdateSchema.validate(object);
-}
-
 module.exports.History = History;
-module.exports.validateHistoryUpdate = validateHistoryUpdate;
