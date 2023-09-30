@@ -19,6 +19,7 @@ async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToU
     let listNewHistoryIds = [];
     // insert operations:
     for (let i = 0; i < historyObjectsToInsert.length; i++) {
+        await History.validate(historyObjectsToInsert[i]);  // validate object (custom validation is not performed by the 'bulkWrite' method)
         listNewHistoryIds.push(historyObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne: {
@@ -28,6 +29,7 @@ async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToU
     };
     // update operations:
     for (let i = 0; i < historyObjectsToUpdate.length; i++) {
+        await History.validate(historyObjectsToUpdate[i]);  // validate object (custom validation is not performed by the 'bulkWrite' method)
         // push updateOne operation in the array:
         // TODO: it only uses the first element of 'history' array, but no check is performed to ensure that it has a single element
         bulkOperations.push({

@@ -57,10 +57,10 @@ const historySchema = new mongoose.Schema({
                 validator: function (v) { return v.length >= 1; },
                 message: function (props) { return `${props.path} must have length >= 1, got '${props.value}'`; }
             },
-            // {
-            //     validator: function (v) { return v[v.length].date == this.lastUpdate; },
-            //     message: function (props) { return `Date of last element in ${props.path} must match 'lastUpdate', got '${props.value}' nas 'lastUpdate'='${this.lastUpdate}'`; }
-            // }
+            {
+                validator: function (v) { return v[v.length -1].date == this.lastUpdate; },
+                message: function (props) { return `Date of last element in ${props.path} must match 'lastUpdate', got '${props.value}'`; }
+            }
         ]
     },
     lastUpdate: {

@@ -49,6 +49,7 @@ describe('save/update history feature', () => {
         test('saving document with incorrect format should raise an error', async () => {
             // ensure that missing fields are detected:
             const historyObjectList = [{}]
+            console.log('historyObjectList: ', historyObjectList);
             await expect(updateHistoryCollection(historyObjectList, [])).rejects.toThrow(/Path .* is required/i);
         });
         
@@ -122,12 +123,16 @@ describe('save/update history feature', () => {
         test("passing updating data with empty 'history' array should throw", async () => {
             let historyObjectList = generateHistoryObjectList(convertStationsFormat(stationRawObjectList));
             historyObjectList[0].history = [];
-            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow();
+            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow(/must have length >= 1/i);
         });
 
         test("passing updating data with 'lastUpdate' != 'history[-1].date' should throw", async () => {
-            // TODO
-            expect(0).toBe(1);
+            let historyObjectList = generateHistoryObjectList(convertStationsFormat(stationRawObjectList));
+            // change lastUpdate value:
+            let newDate = new Date(historyObjectList[0].lastUpdate);
+            newDate.setDate(newDate.getDate() +1);  // add a day
+            historyObjectList[0].lastUpdate = newDate;
+            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow(/must match 'lastUpdate'/i);
         });
     });
 });
