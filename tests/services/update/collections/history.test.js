@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const { History } = require('../../../../models/history');
 const { stationRawObjectList } = require('../../../const');
 const { convertStationsFormat, generateHistoryObjectList } = require('../../../../utils/convert');
-const { updateHistoryCollection } = require('../../../../services/update/collections/history');
+const { bulkWriteHistoryCollection } = require('../../../../services/update/collections/history');
 
 
 let server = null;
@@ -28,7 +28,7 @@ describe('save/update history feature', () => {
         test('data should be avaiable after being saved into the DB', async () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             const historyObjectList = generateHistoryObjectList(stationObjectList);
-            await updateHistoryCollection(historyObjectList, []);
+            await bulkWriteHistoryCollection(historyObjectList, []);
             const doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
             expect(doc).toBeDefined();
             expect(doc).not.toBe(null);
@@ -40,7 +40,7 @@ describe('save/update history feature', () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             let historyObjectList = generateHistoryObjectList(stationObjectList);
             historyObjectList.push(historyObjectList[0]);  // duplicate doc in the array
-            await expect(updateHistoryCollection(historyObjectList, [])).rejects.toThrow(/duplicate key error/i);
+            await expect(bulkWriteHistoryCollection(historyObjectList, [])).rejects.toThrow(/duplicate key error/i);
             // search the DB:
             const doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
             expect(doc).toBeNull();
@@ -49,14 +49,14 @@ describe('save/update history feature', () => {
         test('saving document with incorrect format should raise an error', async () => {
             // ensure that missing fields are detected:
             const historyObjectList = [{}]
-            await expect(updateHistoryCollection(historyObjectList, [])).rejects.toThrow(/Path .* is required/i);
+            await expect(bulkWriteHistoryCollection(historyObjectList, [])).rejects.toThrow(/Path .* is required/i);
         });
         
         test('a field unkown by the model should not be saved in the DB', async () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             let historyObjectList = generateHistoryObjectList(stationObjectList);
             historyObjectList[0].newField = "a new field";
-            await updateHistoryCollection(historyObjectList, []);
+            await bulkWriteHistoryCollection(historyObjectList, []);
             // read DB:
             const doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
             expect(doc).toBeDefined();
@@ -69,7 +69,7 @@ describe('save/update history feature', () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             let historyObjectList = generateHistoryObjectList(stationObjectList);
             // save document:            
-            await updateHistoryCollection(historyObjectList, []);
+            await bulkWriteHistoryCollection(historyObjectList, []);
             // update document:
             const newStationName = "New station name";
             const newFuelName = "New fuel name";
@@ -82,7 +82,7 @@ describe('save/update history feature', () => {
             newPriceDate.setDate(newPriceDate.getDate() +1);  // add a day
             historyObjectList[0].history[0].date = newPriceDate;
             historyObjectList[0].lastUpdate = newPriceDate;
-            await updateHistoryCollection([], historyObjectList);
+            await bulkWriteHistoryCollection([], historyObjectList);
             // read DB:
             let doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
             expect(doc).toBeDefined();
@@ -98,13 +98,13 @@ describe('save/update history feature', () => {
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             let historyObjectList = generateHistoryObjectList(stationObjectList);
             // save document:            
-            await updateHistoryCollection(historyObjectList, []);
+            await bulkWriteHistoryCollection(historyObjectList, []);
             // update document:
             const newStationName = "New station name";
             const newFuelName = "New fuel name";
             historyObjectList[0].station.name = newStationName;
             historyObjectList[0].fuel.shortName = newFuelName;
-            await updateHistoryCollection([], historyObjectList);
+            await bulkWriteHistoryCollection([], historyObjectList);
             // read DB:
             let doc = await History.findByStationAndFuelIds(historyObjectList[0].station._id, historyObjectList[0].fuel._id);
             expect(doc).toBeDefined();
@@ -116,13 +116,13 @@ describe('save/update history feature', () => {
         test('passing updating data with incorrect format should throw', async () => {
             let historyObjectList = generateHistoryObjectList(convertStationsFormat(stationRawObjectList));
             historyObjectList[0].history[0].price = "a string";
-            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow();
+            await expect(bulkWriteHistoryCollection([], historyObjectList)).rejects.toThrow();
         });
 
         test("passing updating data with empty 'history' array should throw", async () => {
             let historyObjectList = generateHistoryObjectList(convertStationsFormat(stationRawObjectList));
             historyObjectList[0].history = [];
-            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow(/must have length >= 1/i);
+            await expect(bulkWriteHistoryCollection([], historyObjectList)).rejects.toThrow(/must have length >= 1/i);
         });
 
         test("passing updating data with 'lastUpdate' != 'history[-1].date' should throw", async () => {
@@ -131,7 +131,7 @@ describe('save/update history feature', () => {
             let newDate = new Date(historyObjectList[0].lastUpdate);
             newDate.setDate(newDate.getDate() +1);  // add a day
             historyObjectList[0].lastUpdate = newDate;
-            await expect(updateHistoryCollection([], historyObjectList)).rejects.toThrow(/must match 'lastUpdate'/i);
+            await expect(bulkWriteHistoryCollection([], historyObjectList)).rejects.toThrow(/must match 'lastUpdate'/i);
         });
     });
 });

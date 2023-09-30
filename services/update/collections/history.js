@@ -4,7 +4,9 @@
 
 const cache = require('../../cache');
 const { History } = require('../../../models/history');
+const { filterKnownObjects } = require('../../../utils/filter');
 const { runInMongooseTransaction } = require('../../../utils/transactions');
+const { generateHistoryObjectList } = require('../../../utils/convert');
 
 
 /**
@@ -12,7 +14,7 @@ const { runInMongooseTransaction } = require('../../../utils/transactions');
  * @param {Array<Object>} historyObjectsToInsert List of history objects to insert in the DB
  * @param {Array<Object>} historyObjectsToUpdate List of history objects to update within the DB. Should respect the format historyUpdateSchema defined in models
  */
-async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToUpdate, session=null) {
+async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjectsToUpdate, session=null) {
     if (typeof historyObjectsToInsert == 'undefined') throw Error(`You should provide a 'historyObjectsToInsert' parameter. Given: '${historyObjectsToInsert}'`);
     if (typeof historyObjectsToUpdate == 'undefined') throw Error(`You should provide a 'historyObjectsToUpdate' parameter. Given: '${historyObjectsToUpdate}'`);
     let bulkOperations = [];
@@ -57,4 +59,17 @@ async function updateHistoryCollection(historyObjectsToInsert, historyObjectsToU
     });
 };
 
+/**
+ * Wrapper that recieves a list of station objects and process them to correctly update the history collection
+ * @param {*} stationObjectList list of station objects
+ * @param {*} session session object linked to a current mongoose transaction (optionnal)
+ */
+async function updateHistoryCollection(stationObjectList, session=null) {
+    const historyObjectsList = generateHistoryObjectList(stationObjectList);
+    const listKnownHistoryIds = await cache.getKnownHistoryIds();
+    const historyObjectListFiltered = filterKnownObjects(historyObjectsList, listKnownHistoryIds);
+    await bulkWriteHistoryCollection(historyObjectListFiltered.objectsNew, historyObjectListFiltered.objectsKnown, session);
+};
+
+module.exports.bulkWriteHistoryCollection = bulkWriteHistoryCollection;
 module.exports.updateHistoryCollection = updateHistoryCollection;

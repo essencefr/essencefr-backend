@@ -4,6 +4,7 @@
 
 const cache = require('../../cache');
 const { Station } = require('../../../models/station');
+const { filterKnownObjects } = require('../../../utils/filter');
 const { runInMongooseTransaction } = require('../../../utils/transactions');
 
 
@@ -12,7 +13,7 @@ const { runInMongooseTransaction } = require('../../../utils/transactions');
  * @param {Array<Object>} stationObjectsToInsert List of station objects to insert in the DB
  * @param {Array<Object>} stationObjectsToUpdate List of station objects to update within the DB
  */
-async function updateStationsCollection(stationObjectsToInsert, stationObjectsToUpdate, session=null) {
+async function bulkWriteStationsCollection(stationObjectsToInsert, stationObjectsToUpdate, session=null) {
     if (typeof stationObjectsToInsert == 'undefined') throw Error(`You should provide a 'stationObjectsToInsert' parameter. Given: '${stationObjectsToInsert}'`);
     if (typeof stationObjectsToUpdate == 'undefined') throw Error(`You should provide a 'stationObjectsToUpdate' parameter. Given: '${stationObjectsToUpdate}'`);
     let bulkOperations = [];
@@ -46,4 +47,16 @@ async function updateStationsCollection(stationObjectsToInsert, stationObjectsTo
     });
 };
 
+/**
+ * Wrapper that recieves a list of station objects and process them to correctly update the station collection
+ * @param {*} stationObjectList list of station objects
+ * @param {*} session session object linked to a current mongoose transaction (optionnal)
+ */
+async function updateStationsCollection(stationObjectList, session=null) {
+    const listKnownStationIds = await cache.getKnownStationIds();
+    const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
+    await bulkWriteStationsCollection(stationObjectListFiltered.objectsNew, stationObjectListFiltered.objectsKnown, session);
+};
+
+module.exports.bulkWriteStationsCollection = bulkWriteStationsCollection;
 module.exports.updateStationsCollection = updateStationsCollection;

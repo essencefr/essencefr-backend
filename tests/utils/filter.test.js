@@ -39,9 +39,9 @@ describe('save/update history feature', () => {
         });
     
         test('an already known station data object should be correctly filtered as known', async () => {
-            const { updateStationsCollection } = require('../../services/update/collections/stations');
+            const { bulkWriteStationsCollection } = require('../../services/update/collections/stations');
             const stationObjectList = convertStationsFormat(stationRawObjectList);
-            await updateStationsCollection(stationObjectList, []);
+            await bulkWriteStationsCollection(stationObjectList, []);
             const listKnownStationIds = await cache.getKnownStationIds();
             const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
             expect(stationObjectListFiltered).toBeDefined();
