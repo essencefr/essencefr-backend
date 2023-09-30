@@ -32,8 +32,10 @@ async function processRawData(stationRawObjectList) {
     // 
     const stationObjectList = convertStationsFormat(stationRawObjectList);
     await runInNewMongooseTransaction(async (session) => {
-        await updateStationsCollection(stationObjectList, session);
-        await updateHistoryCollection(stationObjectList, session);
+        await Promise.all([
+            updateStationsCollection(stationObjectList, session),
+            updateHistoryCollection(stationObjectList, session)
+        ]);
     });
 };
 
