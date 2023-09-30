@@ -14,7 +14,7 @@ let cache = null;
 // main test suite:
 describe('save/update station feature', () => {
     beforeAll(() => {
-        cache = require('../../../cache/cache');
+        cache = require('../../../services/cache');
     });
     beforeEach(() => {
         server = require('../../../index');

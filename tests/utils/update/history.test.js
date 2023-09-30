@@ -49,7 +49,6 @@ describe('save/update history feature', () => {
         test('saving document with incorrect format should raise an error', async () => {
             // ensure that missing fields are detected:
             const historyObjectList = [{}]
-            console.log('historyObjectList: ', historyObjectList);
             await expect(updateHistoryCollection(historyObjectList, [])).rejects.toThrow(/Path .* is required/i);
         });
         

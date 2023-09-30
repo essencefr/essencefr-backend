@@ -2,7 +2,7 @@
  * Wrapper called to save/update the raw data into the different collections
  */
 
-const cache = require('../../cache/cache');
+const cache = require('../../services/cache');
 const { filterKnownObjects } = require('../filter');
 const { convertStationsFormat, generateHistoryObjectList } = require('../convert');
 const { runInNewMongooseTransaction } = require('../transactions');

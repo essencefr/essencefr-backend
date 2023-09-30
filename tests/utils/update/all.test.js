@@ -93,7 +93,7 @@ let cache = null;
 
 describe('generic update feature', () => {
     beforeAll(() => {
-        cache = require('../../../cache/cache');
+        cache = require('../../../services/cache');
     });
     beforeEach(() => {
         server = require('../../../index');

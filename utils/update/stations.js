@@ -2,7 +2,7 @@
  * Code called to update values in the database
  */
 
-const cache = require('../../cache/cache');
+const cache = require('../../services/cache');
 const { Station } = require("../../models/station");
 const { runInMongooseTransaction } = require('../transactions');
 

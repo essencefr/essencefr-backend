@@ -2,6 +2,7 @@
  * Testing the convert features
  */
 
+const { mongoose } = require('mongoose');
 const { Station } = require('../../models/station');
 const { History } = require('../../models/history');
 const { stationRawObjectList } = require('../const');
@@ -15,8 +16,11 @@ describe('convert features', () => {
     beforeEach(() => {
         server = require('../../index');
     });
-    afterEach(async () => {
+    afterEach(() => {
         server.close();
+    });
+    afterAll(async () => {
+        await mongoose.disconnect();
     });
     
     describe('convert stations format', () => {
