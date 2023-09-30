@@ -20,8 +20,8 @@ describe('save/update history feature', () => {
         server.close();
         await History.deleteMany({});
     });
-    afterAll(() => {
-        mongoose.disconnect();
+    afterAll(async () => {
+        await mongoose.disconnect();
     });
 
     describe('insert history document into the DB', () => {

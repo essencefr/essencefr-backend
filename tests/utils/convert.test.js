@@ -17,7 +17,6 @@ describe('convert features', () => {
     });
     afterEach(async () => {
         server.close();
-        await Station.deleteMany({});
     });
     
     describe('convert stations format', () => {

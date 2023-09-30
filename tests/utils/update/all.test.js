@@ -105,7 +105,7 @@ describe('generic update feature', () => {
         cache.flushAll();
     });
     afterAll(async () => {
-        mongoose.disconnect();
+        await mongoose.disconnect();
     });
 
     
