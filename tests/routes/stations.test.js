@@ -25,7 +25,7 @@ describe('/api/stations', () => {
 
     describe('GET /:id', () => {
         test('should return the station when id is correct', async () => {
-            const { updateStationsCollection } = require('../../utils/update/stations');
+            const { updateStationsCollection } = require('../../services/update/collections/stations');
             // define the raw data object:
             const stationId = stationRawObjectList[0].id;
             const stationName = stationRawObjectList[0].name;

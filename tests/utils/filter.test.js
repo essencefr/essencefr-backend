@@ -39,7 +39,7 @@ describe('save/update history feature', () => {
         });
     
         test('an already known station data object should be correctly filtered as known', async () => {
-            const { updateStationsCollection } = require('../../utils/update/stations');
+            const { updateStationsCollection } = require('../../services/update/collections/stations');
             const stationObjectList = convertStationsFormat(stationRawObjectList);
             await updateStationsCollection(stationObjectList, []);
             const listKnownStationIds = await cache.getKnownStationIds();
