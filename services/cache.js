@@ -14,47 +14,52 @@ class MyCache extends NodeCache {
         this.keyKnownHistoryIds = 'knownHistoryIds';
     }
 
-    ///// Station ids cache management : /////
+    ///// Generic methods : /////
 
-    async getKnownStationIds() {
-        let listKnownStationIds = this.get(this.keyKnownStationIds);
-        if (listKnownStationIds == undefined) {
-            listKnownStationIds = await Station.find({}).select('_id');
-            listKnownStationIds = listKnownStationIds.map(object => object._id);  // only keep '_id' fields
-            this.set(this.keyKnownStationIds, listKnownStationIds);
+    /**
+     * Returns all ids known for the given collection
+     * Ids match the field '_id' in the DB documents
+     * @param {String} key key used by the cache to store the requested data
+     * @param {mongoose.model} Model model linked to the collection
+     * @returns array of ids
+     */
+    async getKnownCollectionIds(key, Model) {
+        let idList = this.get(key);
+        if (idList == undefined) {
+            idList = await Model.find({}).select('_id');
+            idList = idList.map(object => object._id);  // only keep '_id' fields
+            this.set(key, idList);
         };
-        return listKnownStationIds;
+        return idList;
     }
 
-    pushInKnownStationIds(listStationIds) {
-        const listKnownStationIdsAlreadyInDb = this.get(this.keyKnownStationIds)
-        if (listKnownStationIdsAlreadyInDb == undefined) {
-            this.set(this.keyKnownStationIds, listStationIds);
+    /**
+     * Appends given ids into the already existing cache object
+     * @param {*} key cache object's key
+     * @param {*} idList list of ids
+     */
+    pushInKnownCollectionIds(key, idList) {
+        const idListAlreadyInCache = this.get(key)
+        if (idListAlreadyInCache == undefined) {
+            this.set(key, idList);
         } else {
-            this.set(this.keyKnownStationIds, listKnownStationIdsAlreadyInDb.concat(listStationIds));
+            this.set(key, idListAlreadyInCache.concat(idList));
         }
     }
+
+
+    ///// Station ids cache management : /////
+
+    async getKnownStationIds() { return this.getKnownCollectionIds(this.keyKnownStationIds, Station); }
+
+    pushInKnownStationIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownStationIds, idList); }
+
 
     ///// History ids cache management : /////
 
-    async getKnownHistoryIds() {
-        let listKnownHistoryIds = this.get(this.keyKnownHistoryIds);
-        if (listKnownHistoryIds == undefined) {
-            listKnownHistoryIds = await History.find({}).select('_id');
-            listKnownHistoryIds = listKnownHistoryIds.map(object => object._id);  // only keep '_id' fields
-            this.set(this.keyKnownHistoryIds, listKnownHistoryIds);
-        };
-        return listKnownHistoryIds;
-    }
+    async getKnownHistoryIds() { return this.getKnownCollectionIds(this.keyKnownHistoryIds, History); }
 
-    pushInKnownHistoryIds(listHistoryIds) {
-        const listKnownHistoryIdsAlreadyInDb = this.get(this.keyKnownHistoryIds)
-        if (listKnownHistoryIdsAlreadyInDb == undefined) {
-            this.set(this.keyKnownHistoryIds, listHistoryIds);
-        } else {
-            this.set(this.keyKnownHistoryIds, listKnownHistoryIdsAlreadyInDb.concat(listHistoryIds));
-        }
-    }
+    pushInKnownHistoryIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownHistoryIds, idList); }
 }
 
 module.exports = new MyCache();
