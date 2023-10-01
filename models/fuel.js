@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 /***** Genreric varaibles/const *****/
 
 const Fuel = mongoose.model('Fuel', new mongoose.Schema({
-    fuelId: {
+    _id: {
         type: Number,
         required: true
     },

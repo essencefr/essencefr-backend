@@ -3,6 +3,7 @@
  */
 
 
+const { cache } = require('../services/cache');
 const { validateStationRaw } = require('../models/station');
 
 /**
@@ -43,18 +44,6 @@ function convertStationFormat(stationRawObject) {
 };
 
 /**
- * Convert multiple station raw objects into the format expected by the DB
- * @param {Array<Object>} stationRawObjectList multiple station objects in JSON format such as defined by the government API
- */
-function convertStationsFormat(stationRawObjectList) {
-    let stationObjectList = [];
-    stationRawObjectList.forEach(element => {
-        stationObjectList.push(convertStationFormat(element));
-    });
-    return stationObjectList;
-};
-
-/**
  * Generate history object(s) from single station object (as many history objects as fuel types in given station object)
  * @param {Object} stationObject station object
  */
@@ -89,16 +78,46 @@ function generateHistoryObject(stationObject) {
 };
 
 /**
- * Generate history objects from multiple station objects
- * @param {Array<Object>} stationObjectList array of station object
+ * Generate fuel object(s) from single station object (as many fuel objects as fuel types in given station object)
+ * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
  */
-function generateHistoryObjectList(stationObjectList) {
-    let historyObjectList = [];
-    stationObjectList.forEach(element => {
-        historyObjectList.push(...generateHistoryObject(element));
-    });
-    return historyObjectList;
+function generateFuelObject(stationRawObject) {
+    // const { error } = validateStationRaw(stationRawObject);
+    // if(error) throw Error(`Validation error: ${error.details[0].message}`);
+    // /!\ The previous validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
+    let fuelObjects = [];
+    let fuelObject = null;
+    for(let i = 0; i < stationRawObject.fuels.length; i++) {
+        // Only do the object generation if the _id is unknown. This allows to increase performance and has no functionnal impact since fuel documents are never modified but only added into the DB
+        const listKnownFuelIds = cache.getKnownFuelIds();
+        if (listKnownFuelIds.includes(stationRawObject.Fuels[i].id)) {
+            fuelObject = {
+                _id: stationRawObject.Fuels[i].id,
+                name: stationRawObject.Fuels[i].name,
+                picto: stationRawObject.Fuels[i].picto
+            }
+            fuelObjects.push(fuelObject);
+            fuelObject = null;
+        }
+    };
+    return fuelObjects;
 };
 
-module.exports.convertStationsFormat = convertStationsFormat;
-module.exports.generateHistoryObjectList = generateHistoryObjectList;
+/**
+ * Wrapper to generate specific objects from multiple input objects
+ * @param {Array<Object>} inputObjectList array of objects
+ * @param {reference} generationFunction reference to the generation function that should return an object or an array of objects
+ */
+function generateObjectList(inputObjectList, generationFunction) {
+    let objectList = [];
+    inputObjectList.forEach(element => {
+        const generated = generationFunction(element);  // returns an object or an array of objects
+        if (Array.isArray(generated)) { objectList.push(...generated); }
+        else { objectList.push(generated); }
+    });
+    return objectList;
+};
+
+module.exports.convertStationsFormat = (inputObjectList) => { return generateObjectList(inputObjectList, convertStationFormat) };
+module.exports.generateHistoryObjectList = (inputObjectList) => { return generateObjectList(inputObjectList, generateHistoryObject) };
+module.exports.generateFuelObjectList = (inputObjectList) => { return generateObjectList(inputObjectList, generateFuelObject) };

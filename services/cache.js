@@ -5,6 +5,7 @@
 const NodeCache = require('node-cache');
 const { Station } = require('../models/station');
 const { History } = require('../models/history');
+const { Fuel } = require('../models/fuel');
 
 
 class MyCache extends NodeCache {
@@ -12,6 +13,7 @@ class MyCache extends NodeCache {
         super();
         this.keyKnownStationIds = 'knownStationIds';
         this.keyKnownHistoryIds = 'knownHistoryIds';
+        this.keyKnownFuelIds = 'knownFuelIds';
     }
 
     ///// Generic methods : /////
@@ -60,6 +62,13 @@ class MyCache extends NodeCache {
     async getKnownHistoryIds() { return this.getKnownCollectionIds(this.keyKnownHistoryIds, History); }
 
     pushInKnownHistoryIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownHistoryIds, idList); }
+
+
+    ///// Fuel ids cache management : /////
+
+    async getKnownFuelIds() { return this.getKnownCollectionIds(this.keyKnownFuelIds, Fuel); }
+
+    pushInKnownFuelIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownFuelIds, idList); }
 }
 
 module.exports = new MyCache();
