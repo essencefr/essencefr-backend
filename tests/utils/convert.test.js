@@ -59,18 +59,16 @@ describe('convert features', () => {
 
     describe('generate fuel objects', () => {
         test('generated fuel objects should have the mongoose Schema format defined in models', async () => {
-            const fuelObjectList = generateFuelObjectList(stationRawObjectList);
+            const fuelObjectList = await generateFuelObjectList(stationRawObjectList);
             expect(fuelObjectList.length).toBe(3);
             const doc = Fuel.hydrate(fuelObjectList[0]);
             await expect(doc.validate()).resolves.toBeUndefined();
         });
 
-        test('generating fuel object from station object with wrong format should throw', () => {
+        test('generating fuel object from station object with wrong format should throw', async () => {
             const stationRawObjectListIncorrect = JSON.parse(JSON.stringify(stationRawObjectList));
             delete stationRawObjectListIncorrect[0].Fuels[0].name;
-            expect(() => {
-                generateFuelObjectList(stationRawObjectListIncorrect);
-            }).toThrow();
+            await expect(generateFuelObjectList(stationRawObjectListIncorrect)).rejects.toThrow();
         });
     });
 });

@@ -2,7 +2,7 @@
  * Module with conversion functions
  */
 
-
+const cache = require('../services/cache');
 const { validateStationRaw } = require('../models/station');
 
 /**
@@ -80,7 +80,7 @@ function generateHistoryObject(stationObject) {
  * Generate fuel object(s) from single station object (as many fuel objects as fuel types in given station object)
  * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
  */
-function generateFuelObject(stationRawObject, bypassValidation=false) {
+async function generateFuelObject(stationRawObject, bypassValidation=false) {
     // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
     if (!bypassValidation) {
         const { error } = validateStationRaw(stationRawObject);
@@ -88,15 +88,18 @@ function generateFuelObject(stationRawObject, bypassValidation=false) {
     }
     let fuelObjects = [];
     let fuelObject = null;
+    const listKnownFuelIds = await cache.getKnownFuelIds();
     for(let i = 0; i < stationRawObject.Fuels.length; i++) {
-        fuelObject = {
-            _id: stationRawObject.Fuels[i].id,
-            name: stationRawObject.Fuels[i].name,
-            shortName: stationRawObject.Fuels[i].short_name,
-            picto: stationRawObject.Fuels[i].picto
+        if(! listKnownFuelIds.includes(stationRawObject.Fuels[i].id)) {
+            fuelObject = {
+                _id: stationRawObject.Fuels[i].id,
+                name: stationRawObject.Fuels[i].name,
+                shortName: stationRawObject.Fuels[i].short_name,
+                picto: stationRawObject.Fuels[i].picto
+            }
+            fuelObjects.push(fuelObject);
+            fuelObject = null;
         }
-        fuelObjects.push(fuelObject);
-        fuelObject = null;
     };
     return fuelObjects;
 };
@@ -116,6 +119,21 @@ function generateObjectList(inputObjectList, generationFunction) {
     return objectList;
 };
 
+/**
+ * Async wrapper to generate specific objects from multiple input objects
+ * @param {Array<Object>} inputObjectList array of objects
+ * @param {reference} generationFunction reference to the generation function that should return an object or an array of objects
+ */
+async function generateObjectListAsync(inputObjectList, generationFunction) {
+    let objectList = [];
+    await Promise.all(inputObjectList.map(async (element) => {
+        const generated = await generationFunction(element);  // returns an object or an array of objects
+        if (Array.isArray(generated)) { objectList.push(...generated); }
+        else { objectList.push(generated); }
+    }));
+    return objectList;
+};
+
 module.exports.convertStationsFormat = (inputObjectList) => { return generateObjectList(inputObjectList, convertStationFormat) };
 module.exports.generateHistoryObjectList = (inputObjectList) => { return generateObjectList(inputObjectList, generateHistoryObject) };
-module.exports.generateFuelObjectList = (inputObjectList) => { return generateObjectList(inputObjectList, generateFuelObject) };
+module.exports.generateFuelObjectList = (inputObjectList) => { return generateObjectListAsync(inputObjectList, generateFuelObject) };
