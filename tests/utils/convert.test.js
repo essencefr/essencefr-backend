@@ -6,7 +6,8 @@ const { mongoose } = require('mongoose');
 const { Station } = require('../../models/station');
 const { History } = require('../../models/history');
 const { stationRawObjectList } = require('../const');
-const { convertStationsFormat, generateHistoryObjectList } = require('../../utils/convert');
+const { convertStationsFormat, generateHistoryObjectList, generateFuelObjectList } = require('../../utils/convert');
+const { Fuel } = require('../../models/fuel');
 
 
 let server = null;
@@ -52,6 +53,23 @@ describe('convert features', () => {
         test('generating history object from station object with wrong format should throw', () => {
             expect(() => {
                 generateHistoryObjectList(stationRawObjectList);
+            }).toThrow();
+        });
+    });
+
+    describe('generate fuel objects', () => {
+        test('generated fuel objects should have the mongoose Schema format defined in models', async () => {
+            const fuelObjectList = generateFuelObjectList(stationRawObjectList);
+            expect(fuelObjectList.length).toBe(3);
+            const doc = Fuel.hydrate(fuelObjectList[0]);
+            await expect(doc.validate()).resolves.toBeUndefined();
+        });
+
+        test('generating fuel object from station object with wrong format should throw', () => {
+            const stationRawObjectListIncorrect = JSON.parse(JSON.stringify(stationRawObjectList));
+            delete stationRawObjectListIncorrect[0].Fuels[0].name;
+            expect(() => {
+                generateFuelObjectList(stationRawObjectListIncorrect);
             }).toThrow();
         });
     });
