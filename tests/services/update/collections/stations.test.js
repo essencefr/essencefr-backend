@@ -49,7 +49,7 @@ describe('save/update station feature', () => {
             const doc = await Station.findById(stationObject._id);
             // compare results:
             expect(doc).toBeNull();
-            expect([[], undefined]).toContain(cache.get('knownStationIds'));
+            expect([[], undefined]).toContain(cache.get(cache.keyKnownStationIds));
         });
 
         test('saving no converted raw data should raise an error', async () => {

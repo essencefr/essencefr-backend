@@ -3,7 +3,6 @@
  */
 
 
-const { cache } = require('../services/cache');
 const { validateStationRaw } = require('../models/station');
 
 /**
@@ -81,24 +80,23 @@ function generateHistoryObject(stationObject) {
  * Generate fuel object(s) from single station object (as many fuel objects as fuel types in given station object)
  * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
  */
-function generateFuelObject(stationRawObject) {
-    // const { error } = validateStationRaw(stationRawObject);
-    // if(error) throw Error(`Validation error: ${error.details[0].message}`);
-    // /!\ The previous validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
+function generateFuelObject(stationRawObject, bypassValidation=false) {
+    // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
+    if (!bypassValidation) {
+        const { error } = validateStationRaw(stationRawObject);
+        if(error) throw Error(`Validation error: ${error.details[0].message}`);
+    }
     let fuelObjects = [];
     let fuelObject = null;
-    for(let i = 0; i < stationRawObject.fuels.length; i++) {
-        // Only do the object generation if the _id is unknown. This allows to increase performance and has no functionnal impact since fuel documents are never modified but only added into the DB
-        const listKnownFuelIds = cache.getKnownFuelIds();
-        if (listKnownFuelIds.includes(stationRawObject.Fuels[i].id)) {
-            fuelObject = {
-                _id: stationRawObject.Fuels[i].id,
-                name: stationRawObject.Fuels[i].name,
-                picto: stationRawObject.Fuels[i].picto
-            }
-            fuelObjects.push(fuelObject);
-            fuelObject = null;
+    for(let i = 0; i < stationRawObject.Fuels.length; i++) {
+        fuelObject = {
+            _id: stationRawObject.Fuels[i].id,
+            name: stationRawObject.Fuels[i].name,
+            shortName: stationRawObject.Fuels[i].short_name,
+            picto: stationRawObject.Fuels[i].picto
         }
+        fuelObjects.push(fuelObject);
+        fuelObject = null;
     };
     return fuelObjects;
 };
