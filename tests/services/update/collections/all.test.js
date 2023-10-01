@@ -238,7 +238,6 @@ describe('generic update feature', () => {
             };
         });
         
-        /*
         test('a fuel added to a station should cause the creation of a new history document', async () => {
             const stationRawObject = stationRawObjectList[0];  // only consider the first stationRawObject for this test
             // process raw data to fill up the DB:
@@ -262,9 +261,6 @@ describe('generic update feature', () => {
                 }
             };
             stationRawObjectUpdated.Fuels.push(newFuelObject);
-
-            console.log('stationRawObjectUpdated: ', stationRawObjectUpdated);
-
             // process new raw data:
             // ensure station doc has been modified in the DB:
             await processRawData([stationRawObjectUpdated]);
@@ -283,7 +279,6 @@ describe('generic update feature', () => {
             expect(doc.history[0].price).toEqual(newFuelObject.Price.value);
             expect(doc.history[0].date.toString()).toEqual(new Date(newFuelObject.Update.value).toString());
         });
-        */
 
         test('no modification in a fuel date should not cause any modification in the matching history', () => {
             // TODO
