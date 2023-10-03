@@ -6,23 +6,24 @@ const mongoose = require('mongoose');
 const { convertStationsFormat } = require('../../utils/convert');
 const { filterKnownObjects } = require('../../utils/filter');
 const { stationRawObjectList } = require('../const');
-const { Station } = require('../../models/station');
+const { clearCollections } = require('../common');
 
 let server = null;
 let cache = null;
 
 // main test suite:
 describe('save/update history feature', () => {
-    beforeAll(() => {
+    beforeAll(async () => {
         cache = require('../../services/cache');
+        await clearCollections();
     });
     beforeEach(() => {
         server = require('../../index');
     });
     afterEach(async () => {
-        server.close();
+        await clearCollections();
         cache.flushAll();
-        await Station.deleteMany({});
+        server.close();
     });
     afterAll(async () => {
         await mongoose.disconnect();

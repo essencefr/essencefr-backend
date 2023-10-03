@@ -4,20 +4,23 @@
 
 const request = require('supertest');  // function used to send a request to an endpoint
 const mongoose = require('mongoose');
-const { Station } = require('../../models/station');
 const { stationRawObjectList } = require('../const');
 const { convertStationsFormat } = require('../../utils/convert');
+const { clearCollections } = require('../common');
 
 let server = null;
 
 // main test suite:
 describe('/api/stations', () => {
+    beforeAll(async () => {
+        await clearCollections();
+    });
     beforeEach(() => {
         server = require('../../index');
     });
-    afterEach( async () => {
+    afterEach(async () => {
+        await clearCollections();
         server.close();
-        await Station.deleteMany({});
     });
     afterAll(async () => {
         await mongoose.disconnect();

@@ -7,6 +7,7 @@ const { Fuel } = require('../../../../models/fuel');
 const { stationRawObjectList } = require('../../../const');
 const { generateFuelObjectList } = require('../../../../utils/convert');
 const { bulkWriteFuelsCollection } = require('../../../../services/update/collections/fuels');
+const { clearCollections } = require('../../../common');
 
 
 let server = null;
@@ -16,16 +17,15 @@ let cache = null;
 describe('save/update history feature', () => {
     beforeAll(async () => {
         cache = require('../../../../services/cache');
-        server = require('../../../../index');  // needed to init the DB link to perform the cleaning line below
-        await Fuel.deleteMany({});  // delete DB
+        await clearCollections();
     });
     beforeEach(() => {
         server = require('../../../../index');
     });
     afterEach(async () => {
+        await clearCollections();
         cache.flushAll();
         server.close();
-        await Fuel.deleteMany({});
     });
     afterAll(async () => {
         await mongoose.disconnect();

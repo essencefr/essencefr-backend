@@ -9,17 +9,21 @@ const { Fuel } = require('../../models/fuel');
 const { stationRawObjectList } = require('../const');
 const { convertStationsFormat, generateHistoryObjectList, generateFuelObjectList } = require('../../utils/convert');
 const { bulkWriteFuelsCollection } = require('../../services/update/collections/fuels');
+const { clearCollections } = require('../common');
 
 
 let server = null;
 
 // main test suite:
 describe('convert features', () => {
+    beforeAll(async () => {
+        await clearCollections();
+    });
     beforeEach(() => {
         server = require('../../index');
     });
     afterEach(async () => {
-        await Fuel.deleteMany({});
+        await clearCollections();
         server.close();
     });
     afterAll(async () => {

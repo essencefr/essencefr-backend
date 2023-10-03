@@ -7,22 +7,24 @@ const { Station } = require('../../../../models/station');
 const { stationRawObjectList } = require('../../../const');
 const { bulkWriteStationsCollection } = require('../../../../services/update/collections/stations');
 const { convertStationsFormat } = require('../../../../utils/convert');
+const { clearCollections } = require('../../../common');
 
 let server = null;
 let cache = null;
 
 // main test suite:
 describe('save/update station feature', () => {
-    beforeAll(() => {
+    beforeAll(async () => {
         cache = require('../../../../services/cache');
+        await clearCollections();
     });
     beforeEach(() => {
         server = require('../../../../index');
     });
     afterEach(async () => {
+        await clearCollections();
         cache.flushAll();
         server.close();
-        await Station.deleteMany({});
     });
     afterAll(async () => {
         await mongoose.disconnect();
