@@ -43,10 +43,10 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
  * @param {Boolean} session session object linked to a current mongoose transaction (optionnal)
  * @param {Boolean} bypassValidation flag to bypass the input format validation for better performance (optionnal)
  */
-async function updateFuelCollection(stationRawObjectList, session = null, bypassValidation = false) {
+async function updateFuelsCollection(stationRawObjectList, session = null, bypassValidation = false) {
     const fuelObjectsList = await generateFuelObjectList(stationRawObjectList, bypassValidation);
     await bulkWriteFuelsCollection(fuelObjectsList, session);
 };
 
 module.exports.bulkWriteFuelsCollection = bulkWriteFuelsCollection;
-module.exports.updateFuelCollection = updateFuelCollection;
+module.exports.updateFuelsCollection = updateFuelsCollection;
