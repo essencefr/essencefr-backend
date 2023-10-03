@@ -4,6 +4,7 @@
 
 const { convertStationsFormat } = require('../../../utils/convert');
 const { runInNewMongooseTransaction } = require('../../../utils/transactions');
+const { updateFuelCollection } = require('./fuels');
 const { updateHistoryCollection } = require('./history');
 const { updateStationsCollection } = require('./stations');
 
@@ -34,7 +35,8 @@ async function processRawData(stationRawObjectList) {
     await runInNewMongooseTransaction(async (session) => {
         await Promise.all([
             updateStationsCollection(stationObjectList, session),
-            updateHistoryCollection(stationObjectList, session)
+            updateHistoryCollection(stationObjectList, session),
+            updateFuelCollection(stationRawObjectList, session, true)
         ]);
     });
 };

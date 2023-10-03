@@ -11,7 +11,7 @@ const { validateStationRaw } = require('../models/station');
  */
 function convertStationFormat(stationRawObject) {
     const { error } = validateStationRaw(stationRawObject);
-    if(error) throw Error(`Validation error: ${error.details[0].message}`);
+    if (error) throw Error(`Validation error: ${error.details[0].message}`);
     const stationObject = {
         _id: stationRawObject.id,
         name: stationRawObject.name,
@@ -51,7 +51,7 @@ function generateHistoryObject(stationObject) {
     // This allows the server to directly parse the station objects and improve its performance
     let historyObjects = [];
     let historyObject = null;
-    for(let i = 0; i < stationObject.fuels.length; i++) {
+    for (let i = 0; i < stationObject.fuels.length; i++) {
         historyObject = {
             _id: parseInt(`${stationObject._id}${stationObject.fuels[i]._id}`),
             station: {
@@ -80,17 +80,17 @@ function generateHistoryObject(stationObject) {
  * Generate fuel object(s) from single station object (as many fuel objects as fuel types in given station object)
  * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
  */
-async function generateFuelObject(stationRawObject, bypassValidation=false) {
+async function generateFuelObject(stationRawObject, bypassValidation = false) {
     // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
     if (!bypassValidation) {
         const { error } = validateStationRaw(stationRawObject);
-        if(error) throw Error(`Validation error: ${error.details[0].message}`);
+        if (error) throw Error(`Validation error: ${error.details[0].message}`);
     }
     let fuelObjects = [];
     let fuelObject = null;
     const listKnownFuelIds = await cache.getKnownFuelIds();
-    for(let i = 0; i < stationRawObject.Fuels.length; i++) {
-        if(! listKnownFuelIds.includes(stationRawObject.Fuels[i].id)) {
+    for (let i = 0; i < stationRawObject.Fuels.length; i++) {
+        if (!listKnownFuelIds.includes(stationRawObject.Fuels[i].id)) {
             fuelObject = {
                 _id: stationRawObject.Fuels[i].id,
                 name: stationRawObject.Fuels[i].name,
@@ -136,4 +136,9 @@ async function generateObjectListAsync(inputObjectList, generationFunction) {
 
 module.exports.convertStationsFormat = (inputObjectList) => { return generateObjectList(inputObjectList, convertStationFormat) };
 module.exports.generateHistoryObjectList = (inputObjectList) => { return generateObjectList(inputObjectList, generateHistoryObject) };
-module.exports.generateFuelObjectList = (inputObjectList) => { return generateObjectListAsync(inputObjectList, generateFuelObject) };
+module.exports.generateFuelObjectList = (inputObjectList, bypassValidation = false) => {
+    return generateObjectListAsync(
+        inputObjectList,
+        async (stationRawObject) => { return await generateFuelObject(stationRawObject, bypassValidation); }
+    )
+};

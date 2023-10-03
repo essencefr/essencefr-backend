@@ -5,9 +5,10 @@
 const { mongoose } = require('mongoose');
 const { Station } = require('../../models/station');
 const { History } = require('../../models/history');
+const { Fuel } = require('../../models/fuel');
 const { stationRawObjectList } = require('../const');
 const { convertStationsFormat, generateHistoryObjectList, generateFuelObjectList } = require('../../utils/convert');
-const { Fuel } = require('../../models/fuel');
+const { bulkWriteFuelsCollection } = require('../../services/update/collections/fuels');
 
 
 let server = null;
@@ -17,7 +18,8 @@ describe('convert features', () => {
     beforeEach(() => {
         server = require('../../index');
     });
-    afterEach(() => {
+    afterEach(async () => {
+        await Fuel.deleteMany({});
         server.close();
     });
     afterAll(async () => {
@@ -69,6 +71,13 @@ describe('convert features', () => {
             const stationRawObjectListIncorrect = JSON.parse(JSON.stringify(stationRawObjectList));
             delete stationRawObjectListIncorrect[0].Fuels[0].name;
             await expect(generateFuelObjectList(stationRawObjectListIncorrect)).rejects.toThrow();
+        });
+
+        test('generating a fuel object whose id already exists in the cache memory should return an empty array', async () => {
+            const fuelObjectList = await generateFuelObjectList(stationRawObjectList);
+            await bulkWriteFuelsCollection(fuelObjectList);
+            const fuelObjectList2 = await generateFuelObjectList(stationRawObjectList);
+            expect(fuelObjectList2).toEqual([]);
         });
     });
 });
