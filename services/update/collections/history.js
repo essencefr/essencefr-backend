@@ -5,7 +5,7 @@
 const cache = require('../../cache');
 const { History } = require('../../../models/history');
 const { filterKnownObjects } = require('../../../utils/filter');
-const { runInMongooseTransaction } = require('../../../utils/transactions');
+const { runInMongooseTransaction, transactionEventEmitter, TRANSACTION_COMPLETE, executeAfterMongooseTransaction } = require('../../../utils/transactions');
 const { generateHistoryObjectList } = require('../../../utils/convert');
 
 
@@ -51,11 +51,13 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
             }
         });
     };
+    // prepare the cache to be updated at end of transaction:
+    executeAfterMongooseTransaction(() => {
+        cache.pushInKnownHistoryIds(listNewHistoryIds);
+    });
     // save the data within a transaction so that no data will be stored if an _id already exists:
     await runInMongooseTransaction(session, async (session) => {
-        const bulkWriteResult = await History.bulkWrite(bulkOperations, { session });
-        // update cache only if the 'bulkWrite' operation completes without error
-        if (bulkWriteResult.ok) cache.pushInKnownHistoryIds(listNewHistoryIds);
+        await History.bulkWrite(bulkOperations, { session });
     });
 };
 

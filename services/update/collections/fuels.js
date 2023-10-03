@@ -4,7 +4,7 @@
 
 const cache = require('../../cache');
 const { Fuel } = require('../../../models/fuel');
-const { runInMongooseTransaction } = require("../../../utils/transactions");
+const { runInMongooseTransaction, TRANSACTION_COMPLETE, transactionEventEmitter, executeAfterMongooseTransaction } = require("../../../utils/transactions");
 const { generateFuelObjectList } = require('../../../utils/convert');
 
 
@@ -29,11 +29,13 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
             }
         });
     };
+    // prepare the cache to be updated at end of transaction:
+    executeAfterMongooseTransaction(() => {
+        cache.pushInKnownFuelIds(listNewFuelIds);
+    });
     // save the data within a transaction so that no data will be stored if an _id already exists:
     await runInMongooseTransaction(session, async (session) => {
-        const bulkWriteResult = await Fuel.bulkWrite(bulkOperations, { session });
-        // update cache only if the 'bulkWrite' operation completes without error
-        if (bulkWriteResult.ok) cache.pushInKnownFuelIds(listNewFuelIds);
+        await Fuel.bulkWrite(bulkOperations, { session });
     });
 };
 

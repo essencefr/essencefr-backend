@@ -4,7 +4,6 @@
 
 const config = require('config');
 const mongoose = require('mongoose');
-// require('../index');  // init the server (nedeed for DB connection and other startup features)
 
 /**
  * Connect to the DB
