@@ -7,7 +7,7 @@ const { Station } = require('../../../../models/station');
 const { History } = require('../../../../models/history');
 const { processRawData } = require('../../../../services/update/collections/all');
 const { stationRawObjectList } = require('../../../const');
-const { clearCollections } = require('../../../common');
+const { clearCollections, connectToDB } = require('../../../common');
 const { Fuel } = require('../../../../models/fuel');
 
 const stationRawObjectListUpdated = [
@@ -88,21 +88,17 @@ const stationRawObjectListUpdated = [
     }
 ];
 
-let server = null;
 let cache = null;
 
 describe('generic update feature', () => {
     beforeAll(async () => {
         cache = require('../../../../services/cache');
+        connectToDB();
         await clearCollections();
-    });
-    beforeEach(() => {
-        server = require('../../../../index');
     });
     afterEach(async () => {
         await clearCollections();
         cache.flushAll();
-        server.close();
     });
     afterAll(async () => {
         await mongoose.disconnect();

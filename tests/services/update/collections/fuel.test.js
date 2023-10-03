@@ -7,25 +7,21 @@ const { Fuel } = require('../../../../models/fuel');
 const { stationRawObjectList } = require('../../../const');
 const { generateFuelObjectList } = require('../../../../utils/convert');
 const { bulkWriteFuelsCollection } = require('../../../../services/update/collections/fuels');
-const { clearCollections } = require('../../../common');
+const { clearCollections, connectToDB } = require('../../../common');
 
 
-let server = null;
 let cache = null;
 
 // main test suite:
 describe('save/update history feature', () => {
     beforeAll(async () => {
         cache = require('../../../../services/cache');
+        connectToDB();
         await clearCollections();
-    });
-    beforeEach(() => {
-        server = require('../../../../index');
     });
     afterEach(async () => {
         await clearCollections();
         cache.flushAll();
-        server.close();
     });
     afterAll(async () => {
         await mongoose.disconnect();

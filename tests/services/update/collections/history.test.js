@@ -7,25 +7,20 @@ const { History } = require('../../../../models/history');
 const { stationRawObjectList } = require('../../../const');
 const { convertStationsFormat, generateHistoryObjectList } = require('../../../../utils/convert');
 const { bulkWriteHistoryCollection } = require('../../../../services/update/collections/history');
-const { clearCollections } = require('../../../common');
+const { clearCollections, connectToDB } = require('../../../common');
 
-
-let server = null;
 let cache = null;
 
 // main test suite:
 describe('save/update history feature', () => {
     beforeAll(async () => {
         cache = require('../../../../services/cache');
+        connectToDB();
         await clearCollections();
-    });
-    beforeEach(() => {
-        server = require('../../../../index');
     });
     afterEach(async () => {
         await clearCollections();
         cache.flushAll();
-        server.close();
     });
     afterAll(async () => {
         await mongoose.disconnect();

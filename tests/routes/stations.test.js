@@ -6,13 +6,14 @@ const request = require('supertest');  // function used to send a request to an 
 const mongoose = require('mongoose');
 const { stationRawObjectList } = require('../const');
 const { convertStationsFormat } = require('../../utils/convert');
-const { clearCollections } = require('../common');
+const { clearCollections, connectToDB } = require('../common');
 
 let server = null;
 
 // main test suite:
 describe('/api/stations', () => {
     beforeAll(async () => {
+        connectToDB();
         await clearCollections();
     });
     beforeEach(() => {
