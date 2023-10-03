@@ -7,16 +7,10 @@ const mongoose = require('mongoose');
 
 async function runInNewMongooseTransaction(callback) {
     const session = await mongoose.startSession();
-    session.startTransaction();
-    try {
+    await session.withTransaction(async () => {
         await callback(session);
-        await session.commitTransaction();  // commit transaction
-    } catch (e) {
-        await session.abortTransaction();
-        throw Error(e);
-    } finally {
-        await session.endSession();
-    }
+    });
+    await session.endSession();
 };
 
 async function runInMongooseTransaction(session, callback) {

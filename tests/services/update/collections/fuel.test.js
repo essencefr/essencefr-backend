@@ -14,8 +14,10 @@ let cache = null;
 
 // main test suite:
 describe('save/update history feature', () => {
-    beforeAll(() => {
+    beforeAll(async () => {
         cache = require('../../../../services/cache');
+        server = require('../../../../index');  // needed to init the DB link to perform the cleaning line below
+        await Fuel.deleteMany({});  // delete DB
     });
     beforeEach(() => {
         server = require('../../../../index');
