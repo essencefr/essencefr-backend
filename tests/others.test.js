@@ -28,6 +28,11 @@ describe('other tests', () => {
 
     describe('stress tests', () => {
         test('multiple insert and delete operations should not lead to a missing/unfound document in the DB', async () => {
+            /**
+             * TODO: From time to time this test crashes because 'doc' returned by the 'History.findXXX' method is 'null'
+             *       -> investigate why it is 'null'
+             *       This behavior is also present in the 'all' test suite...
+             */
             const nbIterations = 10;
             for(let i=0; i<nbIterations; i++) {
                 // fill the DB:
