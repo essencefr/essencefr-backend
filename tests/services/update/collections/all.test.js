@@ -8,6 +8,7 @@ const { History } = require('../../../../models/history');
 const { processRawData } = require('../../../../services/update/collections/all');
 const { stationRawObjectList } = require('../../../const');
 const { clearCollections } = require('../../../common');
+const { Fuel } = require('../../../../models/fuel');
 
 const stationRawObjectListUpdated = [
     {
@@ -156,6 +157,17 @@ describe('generic update feature', () => {
                 expect(doc.history[0].price).toEqual(stationRawObject.Fuels[i].Price.value);
                 expect(doc.history[0].date.toString()).toEqual(new Date(stationRawObject.Fuels[i].Update.value).toString());
             };
+            // ensure fuel docs have been inserted in the DB:
+            for(let i = 0; i < stationRawObject.Fuels.length; i ++){                
+                doc = await Fuel.findById(stationRawObject.Fuels[i].id);
+                expect(doc).toBeDefined();
+                expect(doc).not.toBeNull();
+                // check all values:
+                expect(doc._id).toEqual(stationRawObject.Fuels[i].id);
+                expect(doc.name).toEqual(stationRawObject.Fuels[i].name);
+                expect(doc.shortName).toEqual(stationRawObject.Fuels[i].short_name);
+                expect(doc.picto).toEqual(stationRawObject.Fuels[i].picto);
+            };
         });
 
         test('station and history documents should be updated after processing raw data related to a known station _id', async () => {
@@ -239,7 +251,7 @@ describe('generic update feature', () => {
             };
         });
         
-        test('a fuel added to a station should cause the creation of a new history document', async () => {
+        test('a fuel added to a station should cause the creation of new history and fuel documents', async () => {
             const stationRawObject = stationRawObjectList[0];  // only consider the first stationRawObject for this test
             // process raw data to fill up the DB:
             await processRawData([stationRawObject]);
@@ -263,27 +275,60 @@ describe('generic update feature', () => {
             };
             stationRawObjectUpdated.Fuels.push(newFuelObject);
             // process new raw data:
-            // ensure station doc has been modified in the DB:
             await processRawData([stationRawObjectUpdated]);
             let doc = await Station.findById(stationRawObject.id);
             expect(doc).toBeDefined();
             expect(doc).not.toBeNull();
             expect(doc.fuels.length).toEqual(stationRawObject.Fuels.length + 1);  // there should be 1 fuel object more
-            // check result:
+            // ensure history doc has been modified in the DB:
             doc = await History.findByStationAndFuelIds(stationRawObject.id, newFuelObject.id);
             expect(doc).toBeDefined();
             expect(doc).not.toBeNull();
+            // check result:
             expect(doc.station.name).toEqual(stationRawObjectUpdated.name);
             expect(doc.fuel._id).toEqual(newFuelObject.id);
             expect(doc.fuel.shortName).toEqual(newFuelObject.short_name);
             expect(doc.history.length).toEqual(1);
             expect(doc.history[0].price).toEqual(newFuelObject.Price.value);
             expect(doc.history[0].date.toString()).toEqual(new Date(newFuelObject.Update.value).toString());
+            // ensure fuel doc has been modified in the DB:
+            doc = await Fuel.findById(newFuelObject.id);
+            expect(doc).toBeDefined();
+            expect(doc).not.toBeNull();
+            // check all values:
+            expect(doc._id).toEqual(newFuelObject.id);
+            expect(doc.name).toEqual(newFuelObject.name);
+            expect(doc.shortName).toEqual(newFuelObject.short_name);
+            expect(doc.picto).toEqual(newFuelObject.picto);
         });
 
-        test('no modification in a fuel date should not cause any modification in the matching history', () => {
-            // TODO
-            expect(1).toBe(1);
+        test('no modification in a fuel date should not cause any modification in the matching history', async () => {
+            const stationRawObject = stationRawObjectList[0];  // only consider the first stationRawObject for this test
+            // process raw data to fill up the DB:
+            await processRawData([stationRawObject]);
+            // update object:
+            let stationRawObjectUpdated = JSON.parse(JSON.stringify(stationRawObjectListUpdated[0]));  // only consider the first stationRawObject for this test
+            stationRawObjectUpdated.Fuels[0].Update.value = stationRawObject.Fuels[0].Update.value;  // set the date to the same value for the first fuel object
+            // process new raw data:
+            await processRawData([stationRawObjectUpdated]);
+            // ensure only history docs with an updated date have been modified in the DB:
+            for(let i = 0; i < stationRawObject.Fuels.length; i ++){                
+                doc = await History.findByStationAndFuelIds(stationRawObject.id, stationRawObject.Fuels[i].id);
+                expect(doc).toBeDefined();
+                expect(doc).not.toBeNull();
+                // check all values:
+                if(i == 0) {  // i.e. if doc matches the fuel element with same date than the one already in the DB
+                    expect(doc.station.name).toEqual(stationRawObject.name);  // still equals to the initial value
+                    expect(doc.fuel._id).toEqual(stationRawObject.Fuels[0].id);  // still equals to the initial value
+                    expect(doc.fuel.shortName).toEqual(stationRawObject.Fuels[0].short_name);  // still equals to the initial value
+                    expect(doc.history.length).toEqual(1);  // no new price should have been appended in the history
+                } else {
+                    expect(doc.station.name).toEqual(stationRawObjectUpdated.name);  // equals to the new value
+                    expect(doc.fuel._id).toEqual(stationRawObjectUpdated.Fuels[i].id);  // equals to the new value
+                    expect(doc.fuel.shortName).toEqual(stationRawObjectUpdated.Fuels[i].short_name);  // equals to the new value
+                    expect(doc.history.length).toEqual(2);  // a new price should have been appended in the history
+                };
+            };
         });
     });
 });
