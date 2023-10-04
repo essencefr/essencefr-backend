@@ -1,1 +1,3 @@
-{}
+{
+    "logDir": "./log_test/"
+}

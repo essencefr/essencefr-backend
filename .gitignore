@@ -1,3 +1,5 @@
 /node_modules
 /_temp
 /coverage
+/log
+/log_test

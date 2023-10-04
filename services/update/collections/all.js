@@ -2,6 +2,7 @@
  * Wrapper called to save/update the raw data into the different collections
  */
 
+const logger = require('../../../logger');
 const { convertStationsFormat } = require('../../../utils/convert');
 const { runInNewMongooseTransaction } = require('../../../utils/transactions');
 const { updateStationsCollection } = require('./stations');
@@ -32,6 +33,9 @@ async function processRawData(stationRawObjectList) {
     // # BRANDS:
     // From all the station objects (no separation here), insert a new brand object in the matching collection if it does not exist yet
     // 
+
+    logger.info('Starting raw data processing');
+    
     const stationObjectList = convertStationsFormat(stationRawObjectList);
     await runInNewMongooseTransaction(async (session) => {
         await Promise.all([
