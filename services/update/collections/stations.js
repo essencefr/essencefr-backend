@@ -2,7 +2,6 @@
  * Code called to update values in the database
  */
 
-const logger = require('../../../logger');
 const cache = require('../../cache');
 const { Station } = require('../../../models/station');
 const { filterKnownObjects } = require('../../../utils/filter');

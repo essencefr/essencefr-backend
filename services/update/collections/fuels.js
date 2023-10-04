@@ -2,7 +2,6 @@
  * Code called to update the documents in the database
  */
 
-const logger = require('../../../logger');
 const cache = require('../../cache');
 const { Fuel } = require('../../../models/fuel');
 const { runInMongooseTransaction, executeAfterMongooseTransaction } = require("../../../utils/transactions");

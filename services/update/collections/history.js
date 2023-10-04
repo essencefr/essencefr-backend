@@ -2,7 +2,6 @@
  * Functions used to update values in the database
  */
 
-const logger = require('../../../logger');
 const cache = require('../../cache');
 const { History } = require('../../../models/history');
 const { filterKnownObjects } = require('../../../utils/filter');
