@@ -120,8 +120,7 @@ async function generateBrandObject(stationRawObject, bypassValidation = false) {
         brandObject = {
             _id: stationRawObject.Brand.id,
             name: stationRawObject.Brand.name,
-            shortName: stationRawObject.Brand.short_name,
-            nbStations: stationRawObject.Brand.nbStations
+            shortName: stationRawObject.Brand.short_name
         }
     }
     return brandObject;

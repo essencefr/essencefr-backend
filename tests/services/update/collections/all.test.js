@@ -17,8 +17,8 @@ const stationRawObjectListUpdated = [
         "Brand": {
             "id": stationRawObjectList[0].Brand.id,
             "name": "Casino [updated value]",  // ...................................... updated value
-            "short_name": "casino [updated value]",
-            "nbStations": -1  // ....................................................... updated value
+            "short_name": "casino [updated value]",  // ................................ updated value
+            "nbStations": stationRawObjectList[0].Brand.nbStations
         },
         "type": stationRawObjectList[0].type,
         "name": "CASINO SUPERMARCHE  [updated value]",  // ............................. updated value
@@ -173,7 +173,6 @@ describe('generic update feature', () => {
             expect(doc._id).toEqual(stationRawObject.Brand.id);
             expect(doc.name).toEqual(stationRawObject.Brand.name);
             expect(doc.shortName).toEqual(stationRawObject.Brand.short_name);
-            expect(doc.nbStations).toEqual(stationRawObject.Brand.nbStations);
         });
 
         test('station and history documents should be updated after processing raw data related to a known station _id', async () => {

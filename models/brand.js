@@ -18,10 +18,6 @@ const Brand = mongoose.model('Brand', new mongoose.Schema({
     shortName: {
         type: String,
         required: true
-    },
-    nbStations: {
-        type: Number,
-        required: true
     }
 }));
 
