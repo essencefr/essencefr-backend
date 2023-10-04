@@ -40,7 +40,7 @@ describe('convert features', () => {
             delete stationRawObjectListIncorrect[0].name;
             expect(() => {
                 convertStationsFormat(stationRawObjectListIncorrect);
-            }).toThrow(/Validation error: .* is required/i);
+            }).toThrow(/.* is required/i);
         });
     });
 

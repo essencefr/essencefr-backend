@@ -13,9 +13,9 @@ const { validateStationRaw } = require('../models/station');
 function convertStationFormat(stationRawObject) {
     const { value, error } = validateStationRaw(stationRawObject);
     if (error) {
-        // throw Error(`Validation error: ${error.details[0].message}`);
-        logger.error(`Error while validating a raw station object: ${error.details[0].message}`, {stationRawObject: value});
-        return null;
+        // throw an error object:
+        // customMessage = `Error while validating a raw station object: ${error.details[0].message}`;
+        throw new Error(`Validation error on raw station object: ${error.details[0].message}`, { error, stationRawObject: value });
     }
     const stationObject = {
         _id: stationRawObject.id,

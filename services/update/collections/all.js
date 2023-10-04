@@ -18,19 +18,19 @@ async function processRawData(stationRawObjectList) {
     logger.info('Starting raw data processing');
     
     const stationObjectList = convertStationsFormat(stationRawObjectList);
-    await runInNewMongooseTransaction(async (session) => {
-        try {
+    try {
+        await runInNewMongooseTransaction(async (session) => {
             await Promise.all([
                 updateStationsCollection(stationObjectList, session),
                 updateHistoryCollection(stationObjectList, session),
                 updateFuelsCollection(stationRawObjectList, session, true),            
                 updateBrandsCollection(stationRawObjectList, session, true)
             ]);
-        } catch (error) {
-            logger.error('Failure during raw data processing', { error });
-        };
-    });
-
+        });
+    } catch (error) {
+        logger.error(error.message, { error });
+    };
+        
     logger.info('End of raw data processing');
 };
 

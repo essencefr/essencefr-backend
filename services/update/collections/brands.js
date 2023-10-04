@@ -21,6 +21,16 @@ async function bulkWriteBrandsCollection(brandObjectsToInsert, session = null) {
     let listNewBrandIds = [];
     // insert operations:
     for (let i = 0; i < brandObjectsToInsert.length; i++) {
+        // validate the javascript objects in order to log them if any issue occurs:
+        try {
+            await Brand.validate(brandObjectsToInsert[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = brandObjectsToInsert[i];
+            error.message = 'Error before brand insert - ' + error.message;
+            throw error;  // re-throw
+        }
+        // save operations:
         listNewBrandIds.push(brandObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne:
@@ -47,17 +57,6 @@ async function bulkWriteBrandsCollection(brandObjectsToInsert, session = null) {
  */
 async function updateBrandsCollection(stationRawObjectList, session = null, bypassValidation = false) {
     const brandObjectsList = await generateBrandObjectList(stationRawObjectList, bypassValidation);
-    // validate the javascript objects in order to log them if any issue occurs:
-    for(let i=0; i<brandObjectsList.length; i++) {
-        try {
-            await Brand.validate(brandObjectsList[i]);
-        } catch (error) {
-            // adding a field in the error object:
-            error.objectValidated = brandObjectsList[i];
-            error._message_details = 'Failed to validate brand object';
-            throw error;  // re-throw
-        }
-    }
     await bulkWriteBrandsCollection(brandObjectsList, session);
 };
 

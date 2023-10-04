@@ -22,6 +22,17 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
     let listNewHistoryIds = [];
     // insert operations:
     for (let i = 0; i < historyObjectsToInsert.length; i++) {
+        // validate the javascript object (custom validation is not performed by the 'bulkWrite' method):
+        for(let i=0; i<historyObjectsToInsert.length; i++) {
+            try {
+                await History.validate(historyObjectsToInsert[i]);
+            } catch (error) {
+                // adding a field in the error object:
+                error.objectValidated = historyObjectsToInsert[i];
+                error.message = 'Error before history insert - ' + error.message;
+                throw error;  // re-throw
+            }
+        }
         listNewHistoryIds.push(historyObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne: {
@@ -31,6 +42,17 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
     };
     // update operations:
     for (let i = 0; i < historyObjectsToUpdate.length; i++) {
+        // validate the javascript object (custom validation is not performed by the 'bulkWrite' method):
+        for(let i=0; i<historyObjectsToUpdate.length; i++) {
+            try {
+                await History.validate(historyObjectsToUpdate[i]);
+            } catch (error) {
+                // adding a field in the error object:
+                error.objectValidated = historyObjectsToUpdate[i];
+                error.message = 'Error before history update - ' + error.message;
+                throw error;  // re-throw
+            }
+        }
         // push updateOne operation in the array:
         // TODO: it only uses the first element of 'history' array, but no check is performed to ensure that it has a single element
         bulkOperations.push({
@@ -67,17 +89,6 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
  */
 async function updateHistoryCollection(stationObjectList, session=null) {
     const historyObjectsList = generateHistoryObjectList(stationObjectList);
-    // validate the javascript object (custom validation is not performed by the 'bulkWrite' method):
-    for(let i=0; i<historyObjectsList.length; i++) {
-        try {
-            await History.validate(historyObjectsList[i]);
-        } catch (error) {
-            // adding a field in the error object:
-            error.objectValidated = historyObjectsList[i];
-            error._message_details = 'Failed to validate history object';
-            throw error;  // re-throw
-        }
-    }
     const listKnownHistoryIds = await cache.getKnownHistoryIds();
     const historyObjectListFiltered = filterKnownObjects(historyObjectsList, listKnownHistoryIds);
     await bulkWriteHistoryCollection(historyObjectListFiltered.objectsNew, historyObjectListFiltered.objectsKnown, session);

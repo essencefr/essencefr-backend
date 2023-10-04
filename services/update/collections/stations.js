@@ -21,6 +21,16 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
     let listNewStationIds = [];
     // insert operations:
     for (let i = 0; i < stationObjectsToInsert.length; i++) {
+        // validate the javascript objects in order to log them if any issue occurs:
+        try {
+            await Station.validate(stationObjectsToInsert[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = stationObjectsToInsert[i];
+            error.message = 'Error before station insert - ' + error.message;
+            throw error;  // re-throw
+        }
+        // save operations:
         listNewStationIds.push(stationObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne:
@@ -31,6 +41,16 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
     };
     // update operations:
     for (let i = 0; i < stationObjectsToUpdate.length; i++) {
+        // validate the javascript objects in order to log them if any issue occurs:
+        try {
+            await Station.validate(stationObjectsToUpdate[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = stationObjectsToUpdate[i];
+            error.message = 'Error before station update - ' + error.message;
+            throw error;  // re-throw
+        }
+        // save operations:
         bulkOperations.push({
             updateOne:
             {
@@ -58,17 +78,6 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
  * @param {*} session session object linked to a current mongoose transaction (optionnal)
  */
 async function updateStationsCollection(stationObjectList, session = null) {
-    // validate the javascript objects in order to log them if any issue occurs:
-    for(let i=0; i<stationObjectList.length; i++) {
-        try {
-            await Station.validate(stationObjectList[i]);
-        } catch (error) {
-            // adding a field in the error object:
-            error.objectValidated = stationObjectList[i];
-            error._message_details = 'Failed to validate station object';
-            throw error;  // re-throw
-        }
-    }
     const listKnownStationIds = await cache.getKnownStationIds();
     const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
     await bulkWriteStationsCollection(stationObjectListFiltered.objectsNew, stationObjectListFiltered.objectsKnown, session);

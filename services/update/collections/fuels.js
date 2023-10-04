@@ -22,6 +22,16 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
     let listNewFuelIds = [];
     // insert operations:
     for (let i = 0; i < fuelObjectsToInsert.length; i++) {
+        // validate the javascript objects in order to log them if any issue occurs:
+        try {
+            await Fuel.validate(fuelObjectsToInsert[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = fuelObjectsToInsert[i];
+            error.message = 'Error before fuel insert - ' + error.message;
+            throw error;  // re-throw
+        }
+        // save operation:
         listNewFuelIds.push(fuelObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne:
@@ -51,17 +61,6 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
  */
 async function updateFuelsCollection(stationRawObjectList, session = null, bypassValidation = false) {
     const fuelObjectsList = await generateFuelObjectList(stationRawObjectList, bypassValidation);
-    // validate the javascript objects in order to log them if any issue occurs:
-    for(let i=0; i<fuelObjectsList.length; i++) {
-        try {
-            await Fuel.validate(fuelObjectsList[i]);
-        } catch (error) {
-            // adding a field in the error object:
-            error.objectValidated = fuelObjectsList[i];
-            error._message_details = 'Failed to validate fuel object';
-            throw error;  // re-throw
-        }
-    }
     await bulkWriteFuelsCollection(fuelObjectsList, session);
 };
 
