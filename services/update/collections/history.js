@@ -2,6 +2,7 @@
  * Functions used to update values in the database
  */
 
+const logger = require('../../../logger');
 const cache = require('../../cache');
 const { History } = require('../../../models/history');
 const { filterKnownObjects } = require('../../../utils/filter');
@@ -21,7 +22,6 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
     let listNewHistoryIds = [];
     // insert operations:
     for (let i = 0; i < historyObjectsToInsert.length; i++) {
-        await History.validate(historyObjectsToInsert[i]);  // validate object (custom validation is not performed by the 'bulkWrite' method)
         listNewHistoryIds.push(historyObjectsToInsert[i]._id);
         bulkOperations.push({
             insertOne: {
@@ -31,7 +31,6 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
     };
     // update operations:
     for (let i = 0; i < historyObjectsToUpdate.length; i++) {
-        await History.validate(historyObjectsToUpdate[i]);  // validate object (custom validation is not performed by the 'bulkWrite' method)
         // push updateOne operation in the array:
         // TODO: it only uses the first element of 'history' array, but no check is performed to ensure that it has a single element
         bulkOperations.push({
@@ -68,6 +67,17 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
  */
 async function updateHistoryCollection(stationObjectList, session=null) {
     const historyObjectsList = generateHistoryObjectList(stationObjectList);
+    // validate the javascript object (custom validation is not performed by the 'bulkWrite' method):
+    for(let i=0; i<historyObjectsList.length; i++) {
+        try {
+            await History.validate(historyObjectsList[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = historyObjectsList[i];
+            error._message_details = 'Failed to validate history object';
+            throw error;  // re-throw
+        }
+    }
     const listKnownHistoryIds = await cache.getKnownHistoryIds();
     const historyObjectListFiltered = filterKnownObjects(historyObjectsList, listKnownHistoryIds);
     await bulkWriteHistoryCollection(historyObjectListFiltered.objectsNew, historyObjectListFiltered.objectsKnown, session);

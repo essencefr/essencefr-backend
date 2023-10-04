@@ -15,36 +15,23 @@ const { updateFuelsCollection } = require('./fuels');
  * @param {Array<Object>} stationRawObjectList raw data provided by the gov API
  */
 async function processRawData(stationRawObjectList) {
-    // TODO:
-    // 
-    // # GENERIC:
-    // Separate station objects in two categories:
-    //      - the ones that are new for the DB
-    //      - the ones already known in the DB (based in their '_id')
-    // # STATIONS:
-    // Execute a bulk write on the 'stations' collection to apply the corresponding operations
-    // # HISTORIES:
-    // 1) Generate history objects from the new station objects
-    // 2) Execute a bulk write on the 'histories' collection to:
-    //      - insert these new history documents
-    //      - append the new fuel prices to the existing history documents
-    // # FUELS:
-    // From all the station objects (no separation here), insert a new fuel object in the matching collection if it does not exist yet
-    // # BRANDS:
-    // From all the station objects (no separation here), insert a new brand object in the matching collection if it does not exist yet
-    // 
-
     logger.info('Starting raw data processing');
     
     const stationObjectList = convertStationsFormat(stationRawObjectList);
     await runInNewMongooseTransaction(async (session) => {
-        await Promise.all([
-            updateStationsCollection(stationObjectList, session),
-            updateHistoryCollection(stationObjectList, session),
-            updateFuelsCollection(stationRawObjectList, session, true),            
-            updateBrandsCollection(stationRawObjectList, session, true)
-        ]);
+        try {
+            await Promise.all([
+                updateStationsCollection(stationObjectList, session),
+                updateHistoryCollection(stationObjectList, session),
+                updateFuelsCollection(stationRawObjectList, session, true),            
+                updateBrandsCollection(stationRawObjectList, session, true)
+            ]);
+        } catch (error) {
+            logger.error('Failure during raw data processing', { error });
+        };
     });
+
+    logger.info('End of raw data processing');
 };
 
 module.exports.processRawData = processRawData;

@@ -3,7 +3,6 @@
  */
 
 const mongoose = require('mongoose');
-const Joi = require('joi');
 
 
 /***** Genreric varaibles/const *****/
@@ -19,7 +18,7 @@ const historySchema = new mongoose.Schema({
             },
             name: {
                 type: String,
-                required: true
+                default: ''
             }
         },
         required: true

@@ -2,6 +2,7 @@
  * Code called to update the documents in the database
  */
 
+const logger = require('../../../logger');
 const cache = require('../../cache');
 const { Fuel } = require('../../../models/fuel');
 const { runInMongooseTransaction, executeAfterMongooseTransaction } = require("../../../utils/transactions");
@@ -29,6 +30,9 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
             }
         });
     };
+
+    // logger.info(`Fuel bulkOperations: ${bulkOperations}`, { bulkOperations });
+
     // prepare the cache to be updated at end of transaction:
     executeAfterMongooseTransaction(() => {
         cache.pushInKnownFuelIds(listNewFuelIds);
@@ -47,6 +51,17 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
  */
 async function updateFuelsCollection(stationRawObjectList, session = null, bypassValidation = false) {
     const fuelObjectsList = await generateFuelObjectList(stationRawObjectList, bypassValidation);
+    // validate the javascript objects in order to log them if any issue occurs:
+    for(let i=0; i<fuelObjectsList.length; i++) {
+        try {
+            await Fuel.validate(fuelObjectsList[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = fuelObjectsList[i];
+            error._message_details = 'Failed to validate fuel object';
+            throw error;  // re-throw
+        }
+    }
     await bulkWriteFuelsCollection(fuelObjectsList, session);
 };
 

@@ -46,8 +46,19 @@ async function bulkWriteBrandsCollection(brandObjectsToInsert, session = null) {
  * @param {Boolean} bypassValidation flag to bypass the input format validation for better performance (optionnal)
  */
 async function updateBrandsCollection(stationRawObjectList, session = null, bypassValidation = false) {
-    const fuelObjectsList = await generateBrandObjectList(stationRawObjectList, bypassValidation);
-    await bulkWriteBrandsCollection(fuelObjectsList, session);
+    const brandObjectsList = await generateBrandObjectList(stationRawObjectList, bypassValidation);
+    // validate the javascript objects in order to log them if any issue occurs:
+    for(let i=0; i<brandObjectsList.length; i++) {
+        try {
+            await Brand.validate(brandObjectsList[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = brandObjectsList[i];
+            error._message_details = 'Failed to validate brand object';
+            throw error;  // re-throw
+        }
+    }
+    await bulkWriteBrandsCollection(brandObjectsList, session);
 };
 
 module.exports.bulkWriteBrandsCollection = bulkWriteBrandsCollection;

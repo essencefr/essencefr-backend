@@ -2,6 +2,7 @@
  * Module with conversion functions
  */
 
+const logger = require('../logger');
 const cache = require('../services/cache');
 const { validateStationRaw } = require('../models/station');
 
@@ -10,11 +11,15 @@ const { validateStationRaw } = require('../models/station');
  * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
  */
 function convertStationFormat(stationRawObject) {
-    const { error } = validateStationRaw(stationRawObject);
-    if (error) throw Error(`Validation error: ${error.details[0].message}`);
+    const { value, error } = validateStationRaw(stationRawObject);
+    if (error) {
+        // throw Error(`Validation error: ${error.details[0].message}`);
+        logger.error(`Error while validating a raw station object: ${error.details[0].message}`, {stationRawObject: value});
+        return null;
+    }
     const stationObject = {
         _id: stationRawObject.id,
-        name: stationRawObject.name,
+        name: stationRawObject.name == null ? '' : stationRawObject.name,  // set to '' (empty string) if value is 'null'
         brand: {
             _id: stationRawObject.Brand.id,
             name: stationRawObject.Brand.name
@@ -56,7 +61,7 @@ function generateHistoryObject(stationObject) {
             _id: parseInt(`${stationObject._id}${stationObject.fuels[i]._id}`),
             station: {
                 _id: stationObject._id,
-                name: stationObject.name
+                name: stationObject.name == null ? '' : stationObject.name,  // set to '' (empty string) if value is 'null'
             },
             fuel: {
                 _id: stationObject.fuels[i]._id,
@@ -136,9 +141,9 @@ function generateObjectList(inputObjectList, generationFunction) {
     inputObjectList.forEach(element => {
         const generated = generationFunction(element);  // returns an object or an array of objects
         if (Array.isArray(generated)) { objectList.push(...generated); }
-        else { objectList.push(generated); }
+        else if (generated != null) { objectList.push(generated); }
     });
-    return objectList;
+    return [...new Map(objectList.map(v => [JSON.stringify(v), v])).values()];  // returns a list with removed duplicates objects (based on their values)
 };
 
 /**
@@ -152,9 +157,10 @@ async function generateObjectListAsync(inputObjectList, generationFunction) {
         const generated = await generationFunction(element);  // returns an object or an array of objects
         if (Array.isArray(generated)) { objectList.push(...generated); }
         else if (generated != null) { objectList.push(generated); }
-    }));
-    return objectList;
+    }));    
+    return [...new Map(objectList.map(v => [JSON.stringify(v), v])).values()];  // returns a list with removed duplicates objects (based on their values)
 };
+
 
 module.exports.convertStationsFormat = (inputObjectList) => { return generateObjectList(inputObjectList, convertStationFormat) };
 module.exports.generateHistoryObjectList = (inputObjectList) => { return generateObjectList(inputObjectList, generateHistoryObject) };

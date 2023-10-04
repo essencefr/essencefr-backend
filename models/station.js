@@ -2,6 +2,7 @@
  * Details about 'station' data model + validators
  */
 
+const logger = require('../logger');
 const mongoose = require('mongoose');
 const Joi = require('joi');
 
@@ -9,7 +10,7 @@ const Joi = require('joi');
 
 const Station = mongoose.model('Station', new mongoose.Schema({
     _id: { type: Number, required: true },
-    name: { type: String, required: true },
+    name: { type: String, default: '' },
     brand: {
         type: {
             _id: { type: Number, required: true },
@@ -26,7 +27,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
     },
     coordinates: {
         type: {
-            latitude: {type: Number, required: true },
+            latitude: { type: Number, required: true },
             longitude: { type: Number, required: true }
         },
         required: true
@@ -53,7 +54,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
 function validateStationRaw(jsonData) {
     const stationRawSchema = Joi.object({
         id: Joi.number().required(),
-        name: Joi.string().required(),
+        name: Joi.string().allow(null).required(),
         Brand: Joi.object().required().keys({
             id: Joi.number().required(),
             name: Joi.string().required()
@@ -82,7 +83,29 @@ function validateStationRaw(jsonData) {
         LastUpdate: Joi.object().required().keys({
             value: Joi.date().required()
         })
-    });
+    })
+    // .error(errors => {
+    //     errors.forEach(err => {
+    //         console.log(err);
+    //         switch (err.code) {
+    //             case "string.base":
+    //                 err.message = err.messages[err.code] + " aaa";
+    //                 break;
+    //             case "any.empty":
+    //                 err.message = "Value should not be empty!";
+    //                 break;
+    //             case "string.min":
+    //                 err.message = `Value should have at least ${err.context.limit} characters!`;
+    //                 break;
+    //             case "string.max":
+    //                 err.message = `Value should have at most ${err.context.limit} characters!`;
+    //                 break;
+    //             default:
+    //                 break;
+    //         }
+    //     });
+    //     return errors;
+    // });
     return stationRawSchema.validate(jsonData, { allowUnknown: true });  // 'allowUnknown' allows the object to have additional paramaters that are not defined in this schema
 };
 

@@ -2,6 +2,7 @@
  * Code called to update values in the database
  */
 
+const logger = require('../../../logger');
 const cache = require('../../cache');
 const { Station } = require('../../../models/station');
 const { filterKnownObjects } = require('../../../utils/filter');
@@ -57,6 +58,17 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
  * @param {*} session session object linked to a current mongoose transaction (optionnal)
  */
 async function updateStationsCollection(stationObjectList, session = null) {
+    // validate the javascript objects in order to log them if any issue occurs:
+    for(let i=0; i<stationObjectList.length; i++) {
+        try {
+            await Station.validate(stationObjectList[i]);
+        } catch (error) {
+            // adding a field in the error object:
+            error.objectValidated = stationObjectList[i];
+            error._message_details = 'Failed to validate station object';
+            throw error;  // re-throw
+        }
+    }
     const listKnownStationIds = await cache.getKnownStationIds();
     const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
     await bulkWriteStationsCollection(stationObjectListFiltered.objectsNew, stationObjectListFiltered.objectsKnown, session);
