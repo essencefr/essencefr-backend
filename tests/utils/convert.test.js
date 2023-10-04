@@ -6,9 +6,11 @@ const { mongoose } = require('mongoose');
 const { Station } = require('../../models/station');
 const { History } = require('../../models/history');
 const { Fuel } = require('../../models/fuel');
+const { Brand } = require('../../models/brand');
 const { stationRawObjectList } = require('../const');
-const { convertStationsFormat, generateHistoryObjectList, generateFuelObjectList } = require('../../utils/convert');
+const { convertStationsFormat, generateHistoryObjectList, generateFuelObjectList, generateBrandObjectList } = require('../../utils/convert');
 const { bulkWriteFuelsCollection } = require('../../services/update/collections/fuels');
+const { bulkWriteBrandsCollection } = require('../../services/update/collections/brands');
 const { clearCollections, connectToDB } = require('../common');
 
 
@@ -77,6 +79,27 @@ describe('convert features', () => {
             await bulkWriteFuelsCollection(fuelObjectList);
             const fuelObjectList2 = await generateFuelObjectList(stationRawObjectList);
             expect(fuelObjectList2).toEqual([]);
+        });
+    });
+
+    describe('generate brand objects', () => {
+        test('generated brand objects should have the mongoose Schema format defined in models', async () => {
+            const brandObjectList = await generateBrandObjectList(stationRawObjectList);
+            const doc = Brand.hydrate(brandObjectList[0]);
+            await expect(doc.validate()).resolves.toBeUndefined();
+        });
+
+        test('generating brand object from station object with wrong format should throw', async () => {
+            const stationRawObjectListIncorrect = JSON.parse(JSON.stringify(stationRawObjectList));
+            delete stationRawObjectListIncorrect[0].Brand.name;
+            await expect(generateBrandObjectList(stationRawObjectListIncorrect)).rejects.toThrow();
+        });
+
+        test('generating a brand object whose id already exists in the cache memory should return an empty array', async () => {
+            const brandObjectList = await generateBrandObjectList(stationRawObjectList);
+            await bulkWriteBrandsCollection(brandObjectList);
+            const brandObjectList2 = await generateBrandObjectList(stationRawObjectList);
+            expect(brandObjectList2).toEqual([]);
         });
     });
 });

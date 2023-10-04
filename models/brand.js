@@ -12,11 +12,11 @@ const Brand = mongoose.model('Brand', new mongoose.Schema({
         required: true
     },
     name: {
-        type: Sting,
+        type: String,
         required: true
     },
     shortName: {
-        type: Sting,
+        type: String,
         required: true
     },
     nbStations: {

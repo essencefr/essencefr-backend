@@ -4,7 +4,7 @@
 
 const cache = require('../../cache');
 const { Fuel } = require('../../../models/fuel');
-const { runInMongooseTransaction, TRANSACTION_COMPLETE, transactionEventEmitter, executeAfterMongooseTransaction } = require("../../../utils/transactions");
+const { runInMongooseTransaction, executeAfterMongooseTransaction } = require("../../../utils/transactions");
 const { generateFuelObjectList } = require('../../../utils/convert');
 
 

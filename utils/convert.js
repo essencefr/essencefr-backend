@@ -105,6 +105,29 @@ async function generateFuelObject(stationRawObject, bypassValidation = false) {
 };
 
 /**
+ * Generate brand object(s) from single station object (as many brand objects as brand types in given station object)
+ * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
+ */
+async function generateBrandObject(stationRawObject, bypassValidation = false) {
+    // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
+    if (!bypassValidation) {
+        const { error } = validateStationRaw(stationRawObject);
+        if (error) throw Error(`Validation error: ${error.details[0].message}`);
+    }
+    let brandObject = null;
+    const listKnownBrandIds = await cache.getKnownBrandIds();
+    if (!listKnownBrandIds.includes(stationRawObject.Brand.id)) {
+        brandObject = {
+            _id: stationRawObject.Brand.id,
+            name: stationRawObject.Brand.name,
+            shortName: stationRawObject.Brand.short_name,
+            nbStations: stationRawObject.Brand.nbStations
+        }
+    }
+    return brandObject;
+};
+
+/**
  * Wrapper to generate specific objects from multiple input objects
  * @param {Array<Object>} inputObjectList array of objects
  * @param {reference} generationFunction reference to the generation function that should return an object or an array of objects
@@ -129,7 +152,7 @@ async function generateObjectListAsync(inputObjectList, generationFunction) {
     await Promise.all(inputObjectList.map(async (element) => {
         const generated = await generationFunction(element);  // returns an object or an array of objects
         if (Array.isArray(generated)) { objectList.push(...generated); }
-        else { objectList.push(generated); }
+        else if (generated != null) { objectList.push(generated); }
     }));
     return objectList;
 };
@@ -140,5 +163,11 @@ module.exports.generateFuelObjectList = (inputObjectList, bypassValidation = fal
     return generateObjectListAsync(
         inputObjectList,
         async (stationRawObject) => { return await generateFuelObject(stationRawObject, bypassValidation); }
+    )
+};
+module.exports.generateBrandObjectList = (inputObjectList, bypassValidation = false) => {
+    return generateObjectListAsync(
+        inputObjectList,
+        async (stationRawObject) => { return await generateBrandObject(stationRawObject, bypassValidation); }
     )
 };

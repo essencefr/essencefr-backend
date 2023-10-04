@@ -5,7 +5,7 @@
 const cache = require('../../cache');
 const { History } = require('../../../models/history');
 const { filterKnownObjects } = require('../../../utils/filter');
-const { runInMongooseTransaction, transactionEventEmitter, TRANSACTION_COMPLETE, executeAfterMongooseTransaction } = require('../../../utils/transactions');
+const { runInMongooseTransaction, executeAfterMongooseTransaction } = require('../../../utils/transactions');
 const { generateHistoryObjectList } = require('../../../utils/convert');
 
 

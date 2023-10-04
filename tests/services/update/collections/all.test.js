@@ -9,15 +9,16 @@ const { processRawData } = require('../../../../services/update/collections/all'
 const { stationRawObjectList } = require('../../../const');
 const { clearCollections, connectToDB } = require('../../../common');
 const { Fuel } = require('../../../../models/fuel');
+const { Brand } = require('../../../../models/brand');
 
 const stationRawObjectListUpdated = [
     {
         "id": stationRawObjectList[0].id,
         "Brand": {
-            "id": 30,  // .............................................................. updated value
+            "id": stationRawObjectList[0].Brand.id,
             "name": "Casino [updated value]",  // ...................................... updated value
-            "short_name": stationRawObjectList[0].Brand.short_name,
-            "nbStations": stationRawObjectList[0].Brand.nbStations
+            "short_name": "casino [updated value]",
+            "nbStations": -1  // ....................................................... updated value
         },
         "type": stationRawObjectList[0].type,
         "name": "CASINO SUPERMARCHE  [updated value]",  // ............................. updated value
@@ -164,6 +165,15 @@ describe('generic update feature', () => {
                 expect(doc.shortName).toEqual(stationRawObject.Fuels[i].short_name);
                 expect(doc.picto).toEqual(stationRawObject.Fuels[i].picto);
             };
+            // ensure brand doc has been inserted in the DB:              
+            doc = await Brand.findById(stationRawObject.Brand.id);
+            expect(doc).toBeDefined();
+            expect(doc).not.toBeNull();
+            // check all values:
+            expect(doc._id).toEqual(stationRawObject.Brand.id);
+            expect(doc.name).toEqual(stationRawObject.Brand.name);
+            expect(doc.shortName).toEqual(stationRawObject.Brand.short_name);
+            expect(doc.nbStations).toEqual(stationRawObject.Brand.nbStations);
         });
 
         test('station and history documents should be updated after processing raw data related to a known station _id', async () => {

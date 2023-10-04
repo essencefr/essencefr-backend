@@ -4,7 +4,9 @@
 
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
+
 const transactionEventEmitter = new EventEmitter();
+transactionEventEmitter.setMaxListeners(0);  // disable the max limit of listeners to not display warning message (caution: this message can be helpful to detect memory leaks)
 
 const TRANSACTION_COMPLETE = 'transaction_complete';
 

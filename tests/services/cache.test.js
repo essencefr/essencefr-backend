@@ -3,9 +3,10 @@
  */
 
 const mongoose = require('mongoose');
-const { Fuel } = require('../../models/fuel');
-const { History } = require('../../models/history');
 const { Station } = require('../../models/station');
+const { History } = require('../../models/history');
+const { Fuel } = require('../../models/fuel');
+const { Brand } = require('../../models/brand');
 const { processRawData } = require('../../services/update/collections/all');
 const { clearCollections, connectToDB } = require('../common');
 const { stationRawObjectList } = require('../const');
@@ -44,6 +45,9 @@ describe('cache tests', () => {
         for(let i=0; i<stationRawObject.Fuels.length; i++) {
             expect(listKnownFuelIds).toContain(stationRawObject.Fuels[i].id);
         }
+        // read cache for brand ids:
+        const listKnownBrandIds = cache.get(cache.keyKnownBrandIds);
+        expect(listKnownBrandIds).toContain(stationRawObject.Brand.id);
     });
 
     test('cache should be emptied directly after calling \'flushAll\'', async () => {
@@ -61,6 +65,7 @@ describe('cache tests', () => {
         const spyStationFind = jest.spyOn(Station, 'find');
         const spyHistoryFind = jest.spyOn(History, 'find');
         const spyFuelFind = jest.spyOn(Fuel, 'find');
+        const spyBrandFind = jest.spyOn(Brand, 'find');
         // process raw data in order to update the cache:
         const stationRawObject = stationRawObjectList[0];  // only consider the first stationRawObject for this test
         await processRawData([stationRawObject]);
@@ -68,6 +73,7 @@ describe('cache tests', () => {
         expect(spyStationFind).toHaveBeenCalled();
         expect(spyHistoryFind).toHaveBeenCalled();
         expect(spyFuelFind).toHaveBeenCalled();
+        expect(spyBrandFind).toHaveBeenCalled();
     });
 
     test('cache should not scan the DB when it is the second time we are inserting a document into the DB', async () => {
@@ -75,6 +81,7 @@ describe('cache tests', () => {
         const spyStationFind = jest.spyOn(Station, 'find');
         const spyHistoryFind = jest.spyOn(History, 'find');
         const spyFuelFind = jest.spyOn(Fuel, 'find');
+        const spyBrandFind = jest.spyOn(Brand, 'find');
         // process raw data in order to update the cache:
         const stationRawObject = stationRawObjectList[0];  // only consider the first stationRawObject for this test
         await processRawData([stationRawObject]);
@@ -83,5 +90,6 @@ describe('cache tests', () => {
         expect(spyStationFind).toHaveBeenCalledTimes(1);
         expect(spyHistoryFind).toHaveBeenCalledTimes(1);
         expect(spyFuelFind).toHaveBeenCalledTimes(1);
+        expect(spyBrandFind).toHaveBeenCalledTimes(1);
     });
 });

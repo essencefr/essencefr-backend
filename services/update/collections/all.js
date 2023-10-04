@@ -4,9 +4,10 @@
 
 const { convertStationsFormat } = require('../../../utils/convert');
 const { runInNewMongooseTransaction } = require('../../../utils/transactions');
-const { updateFuelsCollection } = require('./fuels');
-const { updateHistoryCollection } = require('./history');
 const { updateStationsCollection } = require('./stations');
+const { updateHistoryCollection } = require('./history');
+const { updateBrandsCollection } = require('./brands');
+const { updateFuelsCollection } = require('./fuels');
 
 /**
  * Takes stations raw data and save/update documents in the DB
@@ -36,7 +37,8 @@ async function processRawData(stationRawObjectList) {
         await Promise.all([
             updateStationsCollection(stationObjectList, session),
             updateHistoryCollection(stationObjectList, session),
-            updateFuelsCollection(stationRawObjectList, session, true)
+            updateFuelsCollection(stationRawObjectList, session, true),            
+            updateBrandsCollection(stationRawObjectList, session, true)
         ]);
     });
 };
