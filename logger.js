@@ -9,8 +9,10 @@ const logDir = config.get('logDir');
 
 const logger = winston.createLogger({
     level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'user-service' },
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
     transports: [
         new winston.transports.File({ filename: logDir + 'error.log', level: 'error' }),  // Write all logs with importance level of `error` or less to `error.log`
         new winston.transports.File({ filename: logDir + 'combined.log' }),  // Write all logs with importance level of `info` or less to `combined.log`
