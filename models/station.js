@@ -84,28 +84,6 @@ function validateStationRaw(jsonData) {
             value: Joi.date().required()
         })
     })
-    // .error(errors => {
-    //     errors.forEach(err => {
-    //         console.log(err);
-    //         switch (err.code) {
-    //             case "string.base":
-    //                 err.message = err.messages[err.code] + " aaa";
-    //                 break;
-    //             case "any.empty":
-    //                 err.message = "Value should not be empty!";
-    //                 break;
-    //             case "string.min":
-    //                 err.message = `Value should have at least ${err.context.limit} characters!`;
-    //                 break;
-    //             case "string.max":
-    //                 err.message = `Value should have at most ${err.context.limit} characters!`;
-    //                 break;
-    //             default:
-    //                 break;
-    //         }
-    //     });
-    //     return errors;
-    // });
     return stationRawSchema.validate(jsonData, { allowUnknown: true });  // 'allowUnknown' allows the object to have additional paramaters that are not defined in this schema
 };
 
