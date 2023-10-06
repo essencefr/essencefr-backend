@@ -2,6 +2,9 @@
  * Functions fetching data on others servers APIs
  */
 
+const logger = require('../logger');
+const { executeAndLogPerformance } = require('./timer');
+
 /**
  * Function that retrieves the stations and gas prices 10km around a given location.
  * Calls API from https://swagger.2aaz.fr/
@@ -22,4 +25,4 @@ async function fetchStations(latitude, longitude) {
     return data;
 };
 
-module.exports.fetchStations = fetchStations;
+module.exports.fetchStations = async (latitude, longitude) => { return await executeAndLogPerformance('Fetch stations data', async () => { return await fetchStations(latitude, longitude) }) };

@@ -9,14 +9,13 @@ const { updateStationsCollection } = require('./stations');
 const { updateHistoryCollection } = require('./history');
 const { updateBrandsCollection } = require('./brands');
 const { updateFuelsCollection } = require('./fuels');
+const { executeAndLogPerformance } = require('../../../utils/timer');
 
 /**
  * Takes stations raw data and save/update documents in the DB
  * @param {Array<Object>} stationRawObjectList raw data provided by the gov API
  */
-async function processRawData(stationRawObjectList) {
-    logger.info('Starting raw data processing');
-    
+async function processRawData(stationRawObjectList) {    
     const stationObjectList = convertStationsFormat(stationRawObjectList);
     try {
         await runInNewMongooseTransaction(async (session) => {
@@ -28,11 +27,10 @@ async function processRawData(stationRawObjectList) {
             ]);
         });
     } catch (error) {
-        error.message = 'Process raw data > ' + error.message;
-        logger.error(error.message, { error });
+        error.message = 'Process raw data > ' + error.message;  // update error message
+        throw error;  // re-throw
     };
-        
-    logger.info('End of raw data processing');
 };
 
-module.exports.processRawData = processRawData;
+// module.exports.processRawData = processRawData;
+module.exports.processRawData = async (stationRawObjectList) => { await executeAndLogPerformance('Process raw data', async () => { await processRawData(stationRawObjectList) }) };

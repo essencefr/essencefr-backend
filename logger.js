@@ -10,6 +10,7 @@ const logDir = config.get('logDir');
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
+        winston.format.errors({ stack: true }),
         winston.format.timestamp(),
         winston.format.json()
     ),
@@ -36,7 +37,13 @@ if (process.env.NODE_ENV !== 'production') {
                 format: 'DD-MM-YYYY HH:mm:ss.SSS',
             }),
             winston.format.align(),
-            winston.format.printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`)
+            winston.format.errors({ stack: true }),
+            winston.format.printf((info) => {
+                let text = `[${info.timestamp}] ${info.level}: ${info.message}`;
+                if (info.elapsedTimeInMs) { text = `${(text + ' ').padEnd(100, '.')} ${info.elapsedTimeInMs} ms`; }
+                if (info.stack) { text += `\n${info.stack}`; }
+                return text;
+            })
         ),
         handleExceptions: true,
         handleRejections: true
