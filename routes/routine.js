@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
         await updateRoutine();
         return res.send(`Update routine has been correctly performed.`);
     } catch (err) {
-        res.status(500).send(`Something went wrong. Please consult log files.`);
+        res.status(500).send(err);
         throw err;  // re-throw;
     }
 });
