@@ -2,7 +2,6 @@
  * Details about 'station' data model + validators
  */
 
-const logger = require('../logger');
 const mongoose = require('mongoose');
 const Joi = require('joi');
 
