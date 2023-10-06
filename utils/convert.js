@@ -2,7 +2,6 @@
  * Module with conversion functions
  */
 
-const logger = require('../logger');
 const cache = require('../services/cache');
 const { validateStationRaw } = require('../models/station');
 
@@ -88,8 +87,11 @@ function generateHistoryObject(stationObject) {
 async function generateFuelObject(stationRawObject, bypassValidation = false) {
     // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
     if (!bypassValidation) {
-        const { error } = validateStationRaw(stationRawObject);
-        if (error) throw Error(`Validation error: ${error.details[0].message}`);
+        const { value, error } = validateStationRaw(stationRawObject);
+        if (error) {
+            // throw an error object:
+            throw new Error(`Validation error on raw station object: ${error.details[0].message}`, { error, stationRawObject: value });
+        }
     }
     let fuelObjects = [];
     let fuelObject = null;
@@ -116,8 +118,11 @@ async function generateFuelObject(stationRawObject, bypassValidation = false) {
 async function generateBrandObject(stationRawObject, bypassValidation = false) {
     // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
     if (!bypassValidation) {
-        const { error } = validateStationRaw(stationRawObject);
-        if (error) throw Error(`Validation error: ${error.details[0].message}`);
+        const { value, error } = validateStationRaw(stationRawObject);
+        if (error) {
+            // throw an error object:
+            throw new Error(`Validation error on raw station object: ${error.details[0].message}`, { error, stationRawObject: value });
+        }
     }
     let brandObject = null;
     const listKnownBrandIds = await cache.getKnownBrandIds();

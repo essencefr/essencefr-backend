@@ -28,7 +28,7 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
             } catch (error) {
                 // adding a field in the error object:
                 error.objectValidated = historyObjectsToInsert[i];
-                error.message = 'Error before history insert - ' + error.message;
+                error.message = 'Error before history insert > ' + error.message;
                 throw error;  // re-throw
             }
         }
@@ -48,7 +48,7 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
             } catch (error) {
                 // adding a field in the error object:
                 error.objectValidated = historyObjectsToUpdate[i];
-                error.message = 'Error before history update - ' + error.message;
+                error.message = 'Error before history update > ' + error.message;
                 throw error;  // re-throw
             }
         }

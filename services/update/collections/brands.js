@@ -27,7 +27,7 @@ async function bulkWriteBrandsCollection(brandObjectsToInsert, session = null) {
         } catch (error) {
             // adding a field in the error object:
             error.objectValidated = brandObjectsToInsert[i];
-            error.message = 'Error before brand insert - ' + error.message;
+            error.message = 'Error before brand insert > ' + error.message;
             throw error;  // re-throw
         }
         // save operations:

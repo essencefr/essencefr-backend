@@ -26,7 +26,7 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
         } catch (error) {
             // adding a field in the error object:
             error.objectValidated = stationObjectsToInsert[i];
-            error.message = 'Error before station insert - ' + error.message;
+            error.message = 'Error before station insert > ' + error.message;
             throw error;  // re-throw
         }
         // save operations:
@@ -46,7 +46,7 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
         } catch (error) {
             // adding a field in the error object:
             error.objectValidated = stationObjectsToUpdate[i];
-            error.message = 'Error before station update - ' + error.message;
+            error.message = 'Error before station update > ' + error.message;
             throw error;  // re-throw
         }
         // save operations:

@@ -27,7 +27,7 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
         } catch (error) {
             // adding a field in the error object:
             error.objectValidated = fuelObjectsToInsert[i];
-            error.message = 'Error before fuel insert - ' + error.message;
+            error.message = 'Error before fuel insert > ' + error.message;
             throw error;  // re-throw
         }
         // save operation:

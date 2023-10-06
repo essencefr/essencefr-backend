@@ -28,6 +28,7 @@ async function processRawData(stationRawObjectList) {
             ]);
         });
     } catch (error) {
+        error.message = 'Process raw data > ' + error.message;
         logger.error(error.message, { error });
     };
         
