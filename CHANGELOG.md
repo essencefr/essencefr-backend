@@ -23,6 +23,16 @@ for any bug fixes.
 ### Security
 in case of vulnerabilities.
 -->
+
+## 0.2.0 (06/10/2023)
+ 
+Development version, with basics features.
+
+### Added
+- `history`, `fuel` and `brand` models/schemas
+- Generic routine to fetch data and update the DB
+- API endpoint to GET an history object from its id
+- API endpoint to trigger the update routine (this is temporary because not secure)
  
 ## 0.1.0 (20/09/2023)
  
