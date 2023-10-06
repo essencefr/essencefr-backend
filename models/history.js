@@ -3,7 +3,7 @@
  */
 
 const mongoose = require('mongoose');
-
+const Joi = require('joi');
 
 /***** Genreric varaibles/const *****/
 
@@ -75,4 +75,18 @@ historySchema.static('findByStationAndFuelIds', function (stationId, fuelId) {
 
 const History = mongoose.model('Histories', historySchema);
 
+/***** Validation functions *****/
+
+/**
+ * Validates the 'id' parameter passed in HTTP request
+ */
+function validateRequestParams(reqParams) {
+    // id validation schema (id passed in req params):
+    const idSchema = Joi.object({
+        id: Joi.number().required()
+    });
+    return idSchema.validate(reqParams);
+};
+
 module.exports.History = History;
+module.exports.validateRequestParams = validateRequestParams;
