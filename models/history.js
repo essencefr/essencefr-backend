@@ -83,7 +83,8 @@ const History = mongoose.model('Histories', historySchema);
 function validateRequestParams(reqParams) {
     // id validation schema (id passed in req params):
     const idSchema = Joi.object({
-        id: Joi.number().required()
+        stationId: Joi.number().required(),
+        fuelId: Joi.number().required()
     });
     return idSchema.validate(reqParams);
 };

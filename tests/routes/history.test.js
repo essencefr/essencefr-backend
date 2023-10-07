@@ -28,7 +28,7 @@ describe('/api/history', () => {
         await mongoose.disconnect();
     });
 
-    describe('GET /:id', () => {
+    describe('GET /:stationId&:fuelId', () => {
         test('should return the station when id is correct', async () => {
             // define the raw data object:
             const stationId = stationRawObjectList[0].id;
@@ -38,19 +38,19 @@ describe('/api/history', () => {
             const historyObjectList = generateHistoryObjectList(stationObjectList);
             await bulkWriteHistoryCollection(historyObjectList, []);
             // read database through api endpoint:
-            const res = await request(server).get(`/api/history/${parseInt(`${stationId}${fuelId}`)}`);
+            const res = await request(server).get(`/api/history/${stationId}&${fuelId}`);
             // compare results:
             expect(res.status).toBe(200);
             expect(res.body.station.name).toEqual(stationName);
         });
         
         test('should throw 404 when id is unknwon', async () => {
-            const res = await request(server).get(`/api/history/1`);
+            const res = await request(server).get(`/api/history/1&1`);
             expect(res.status).toBe(404);
         });
 
         test('should throw 400 when id is incorrect', async () => {
-            const res = await request(server).get(`/api/history/a`);
+            const res = await request(server).get(`/api/history/a&a`);
             expect(res.status).toBe(400);
         });
     });
