@@ -46,7 +46,8 @@ if (process.env.NODE_ENV !== 'production') {
             })
         ),
         handleExceptions: true,
-        handleRejections: true
+        handleRejections: true,
+        level: 'silly'
     }));
 }
 
