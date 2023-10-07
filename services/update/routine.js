@@ -2,7 +2,6 @@
  * Module with update routine
  */
 
-const logger = require("../../logger");
 const { fetchStations } = require("../../utils/fetch");
 const { executeAndLogPerformance } = require("../../utils/timer");
 const { processRawData } = require("./collections/all");
