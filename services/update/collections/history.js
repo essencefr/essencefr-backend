@@ -7,6 +7,7 @@ const { History } = require('../../../models/history');
 const { filterKnownObjects } = require('../../../utils/filter');
 const { runInMongooseTransaction, executeAfterMongooseTransaction } = require('../../../utils/transactions');
 const { generateHistoryObjectList } = require('../../../utils/convert');
+const { executeAndLogPerformance } = require('../../../utils/timer');
 
 
 /**
@@ -90,8 +91,10 @@ async function updateHistoryCollection(stationObjectList, session=null) {
     const historyObjectsList = generateHistoryObjectList(stationObjectList);
     const listKnownHistoryIds = await cache.getKnownHistoryIds();
     const historyObjectListFiltered = filterKnownObjects(historyObjectsList, listKnownHistoryIds);
-    await bulkWriteHistoryCollection(historyObjectListFiltered.objectsNew, historyObjectListFiltered.objectsKnown, session);
+    await executeAndLogPerformance('bulk write history collection', 'silly', async () => {
+        await bulkWriteHistoryCollection(historyObjectListFiltered.objectsNew, historyObjectListFiltered.objectsKnown, session);
+    });
 };
 
 module.exports.bulkWriteHistoryCollection = bulkWriteHistoryCollection;
-module.exports.updateHistoryCollection = updateHistoryCollection;
+module.exports.updateHistoryCollection = async (stationRawObjectList, session = null) => { await executeAndLogPerformance('Update history collection', 'verbose', async () => { await updateHistoryCollection(stationRawObjectList, session) }) };

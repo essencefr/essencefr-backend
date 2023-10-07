@@ -6,6 +6,7 @@ const cache = require('../../cache');
 const { Brand } = require('../../../models/brand');
 const { runInMongooseTransaction, executeAfterMongooseTransaction } = require('../../../utils/transactions');
 const { generateBrandObjectList } = require('../../../utils/convert');
+const { executeAndLogPerformance } = require('../../../utils/timer');
 
 
 /**
@@ -57,8 +58,10 @@ async function bulkWriteBrandsCollection(brandObjectsToInsert, session = null) {
  */
 async function updateBrandsCollection(stationRawObjectList, session = null, bypassValidation = false) {
     const brandObjectsList = await generateBrandObjectList(stationRawObjectList, bypassValidation);
-    await bulkWriteBrandsCollection(brandObjectsList, session);
+    await executeAndLogPerformance('bulk write brands collection', 'silly', async () => {
+        await bulkWriteBrandsCollection(brandObjectsList, session);
+    });
 };
 
 module.exports.bulkWriteBrandsCollection = bulkWriteBrandsCollection;
-module.exports.updateBrandsCollection = updateBrandsCollection;
+module.exports.updateBrandsCollection = async (stationRawObjectList, session = null, bypassValidation = false) => { await executeAndLogPerformance('Update brands collection', 'verbose', async () => { await updateBrandsCollection(stationRawObjectList, session, bypassValidation) }) };

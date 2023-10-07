@@ -6,6 +6,7 @@ const cache = require('../../cache');
 const { Fuel } = require('../../../models/fuel');
 const { runInMongooseTransaction, executeAfterMongooseTransaction } = require("../../../utils/transactions");
 const { generateFuelObjectList } = require('../../../utils/convert');
+const { executeAndLogPerformance } = require('../../../utils/timer');
 
 
 /**
@@ -60,8 +61,10 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
  */
 async function updateFuelsCollection(stationRawObjectList, session = null, bypassValidation = false) {
     const fuelObjectsList = await generateFuelObjectList(stationRawObjectList, bypassValidation);
-    await bulkWriteFuelsCollection(fuelObjectsList, session);
+    await executeAndLogPerformance('bulk write fuels collection', 'silly', async () => {
+        await bulkWriteFuelsCollection(fuelObjectsList, session);
+    });
 };
 
 module.exports.bulkWriteFuelsCollection = bulkWriteFuelsCollection;
-module.exports.updateFuelsCollection = updateFuelsCollection;
+module.exports.updateFuelsCollection = async (stationRawObjectList, session = null, bypassValidation = false) => { await executeAndLogPerformance('Update fuels collection', 'verbose', async () => { await updateFuelsCollection(stationRawObjectList, session, bypassValidation) }) };

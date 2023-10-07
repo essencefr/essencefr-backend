@@ -31,5 +31,4 @@ async function processRawData(stationRawObjectList) {
     };
 };
 
-// module.exports.processRawData = processRawData;
 module.exports.processRawData = async (stationRawObjectList) => { await executeAndLogPerformance('Process raw data', 'info', async () => { await processRawData(stationRawObjectList) }) };

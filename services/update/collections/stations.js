@@ -6,6 +6,7 @@ const cache = require('../../cache');
 const { Station } = require('../../../models/station');
 const { filterKnownObjects } = require('../../../utils/filter');
 const { runInMongooseTransaction, executeAfterMongooseTransaction } = require('../../../utils/transactions');
+const { executeAndLogPerformance } = require('../../../utils/timer');
 
 
 /**
@@ -79,8 +80,10 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
 async function updateStationsCollection(stationObjectList, session = null) {
     const listKnownStationIds = await cache.getKnownStationIds();
     const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
-    await bulkWriteStationsCollection(stationObjectListFiltered.objectsNew, stationObjectListFiltered.objectsKnown, session);
+    await executeAndLogPerformance('bulk write stations collection', 'silly', async () => {
+        await bulkWriteStationsCollection(stationObjectListFiltered.objectsNew, stationObjectListFiltered.objectsKnown, session);
+    });
 };
 
 module.exports.bulkWriteStationsCollection = bulkWriteStationsCollection;
-module.exports.updateStationsCollection = updateStationsCollection;
+module.exports.updateStationsCollection = async (stationRawObjectList, session = null) => { await executeAndLogPerformance('Update stations collection', 'verbose', async () => { await updateStationsCollection(stationRawObjectList, session) }) };
