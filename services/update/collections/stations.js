@@ -78,12 +78,9 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
  * @param {*} session session object linked to a current mongoose transaction (optionnal)
  */
 async function updateStationsCollection(stationObjectList, session = null) {
-    let listKnownStationIds = null;
-    await executeAndLogPerformance('generate station object list', 'silly', async () => {
-        listKnownStationIds = await cache.getKnownStationIds();
-    });
     let stationObjectListFiltered = null;
     await executeAndLogPerformance('filter station object list', 'silly', async () => {
+        const listKnownStationIds = await cache.getKnownStationIds();
         stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
     });
     await executeAndLogPerformance('bulk write stations collection', 'silly', async () => {

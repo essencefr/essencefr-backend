@@ -14,8 +14,11 @@ const { executeAndLogPerformance } = require('../../../utils/timer');
  * Takes stations raw data and save/update documents in the DB
  * @param {Array<Object>} stationRawObjectList raw data provided by the gov API
  */
-async function processRawData(stationRawObjectList) {    
-    const stationObjectList = convertStationsFormat(stationRawObjectList);
+async function processRawData(stationRawObjectList) {
+    let stationObjectList = null;
+    await executeAndLogPerformance('generate station object list', 'silly', async () => {
+        stationObjectList = convertStationsFormat(stationRawObjectList);
+    });
     try {
         await runInNewMongooseTransaction(async (session) => {
             await Promise.all([
