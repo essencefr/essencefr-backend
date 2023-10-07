@@ -2,7 +2,6 @@
  * Functions fetching data on others servers APIs
  */
 
-const logger = require('../logger');
 const { executeAndLogPerformance } = require('./timer');
 
 /**
@@ -25,4 +24,4 @@ async function fetchStations(latitude, longitude) {
     return data;
 };
 
-module.exports.fetchStations = async (latitude, longitude) => { return await executeAndLogPerformance('Fetch stations data', async () => { return await fetchStations(latitude, longitude) }) };
+module.exports.fetchStations = async (latitude, longitude) => { return await executeAndLogPerformance('Fetch stations data', 'info', async () => { return await fetchStations(latitude, longitude) }) };

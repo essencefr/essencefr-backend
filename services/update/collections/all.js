@@ -2,7 +2,6 @@
  * Wrapper called to save/update the raw data into the different collections
  */
 
-const logger = require('../../../logger');
 const { convertStationsFormat } = require('../../../utils/convert');
 const { runInNewMongooseTransaction } = require('../../../utils/transactions');
 const { updateStationsCollection } = require('./stations');
@@ -33,4 +32,4 @@ async function processRawData(stationRawObjectList) {
 };
 
 // module.exports.processRawData = processRawData;
-module.exports.processRawData = async (stationRawObjectList) => { await executeAndLogPerformance('Process raw data', async () => { await processRawData(stationRawObjectList) }) };
+module.exports.processRawData = async (stationRawObjectList) => { await executeAndLogPerformance('Process raw data', 'info', async () => { await processRawData(stationRawObjectList) }) };

@@ -9,14 +9,14 @@ const logger = require('../logger');
  * @param {String} callbackName pretty callback name to use in the log
  * @param {reference} callback 
  */
-async function executeAndLogPerformance(callbackName, callback) {
-    logger.info(`${callbackName} - START`);
+async function executeAndLogPerformance(callbackName, logLevel, callback) {
+    logger.log(logLevel, `${callbackName} - START`);
     const startTime = performance.now();  // start timer
 
     const returnValue = await callback();
 
     const elapsedTime = Math.round(performance.now() - startTime);
-    logger.info(`${callbackName} - END`, { elapsedTimeInMs: elapsedTime });  // divide by a million to get nano to milli
+    logger.log(logLevel, `${callbackName} - END`, { elapsedTimeInMs: elapsedTime });  // divide by a million to get nano to milli
 
     return returnValue;
 }

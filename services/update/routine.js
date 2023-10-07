@@ -30,8 +30,8 @@ async function updateRoutine() {
     // Pessac coordinates:
     const latitude = 44.806;
     const longitude = -0.631;
-    await executeAndLogPerformance('Update routine zone', async () => { await updateRoutineZone(latitude, longitude) });
+    await executeAndLogPerformance('Update routine zone', 'info', async () => { await updateRoutineZone(latitude, longitude) });
 }
 
-module.exports.updateRoutineZone = async (latitude, longitude) => { await executeAndLogPerformance('Update routine zone', async () => { await updateRoutineZone(latitude, longitude) }) };
-module.exports.updateRoutine = async () => { await executeAndLogPerformance('Update routine', async () => { await updateRoutine() }) };
+module.exports.updateRoutineZone = async (latitude, longitude) => { await executeAndLogPerformance('Update routine zone', 'info', async () => { await updateRoutineZone(latitude, longitude) }) };
+module.exports.updateRoutine = async () => { await executeAndLogPerformance('Update routine', 'info', async () => { await updateRoutine() }) };
