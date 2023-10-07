@@ -57,7 +57,10 @@ async function bulkWriteBrandsCollection(brandObjectsToInsert, session = null) {
  * @param {Boolean} bypassValidation flag to bypass the input format validation for better performance (optionnal)
  */
 async function updateBrandsCollection(stationRawObjectList, session = null, bypassValidation = false) {
-    const brandObjectsList = await generateBrandObjectList(stationRawObjectList, bypassValidation);
+    let brandObjectsList = null;
+    await executeAndLogPerformance('generate brand object list', 'silly', async () => {
+        brandObjectsList = await generateBrandObjectList(stationRawObjectList, bypassValidation);
+    });
     await executeAndLogPerformance('bulk write brands collection', 'silly', async () => {
         await bulkWriteBrandsCollection(brandObjectsList, session);
     });

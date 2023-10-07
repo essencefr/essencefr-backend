@@ -60,7 +60,10 @@ async function bulkWriteFuelsCollection(fuelObjectsToInsert, session = null) {
  * @param {Boolean} bypassValidation flag to bypass the input format validation for better performance (optionnal)
  */
 async function updateFuelsCollection(stationRawObjectList, session = null, bypassValidation = false) {
-    const fuelObjectsList = await generateFuelObjectList(stationRawObjectList, bypassValidation);
+    let fuelObjectsList = null;
+    await executeAndLogPerformance('generate fuel object list', 'silly', async () => {
+        fuelObjectsList = await generateFuelObjectList(stationRawObjectList, bypassValidation);
+    });
     await executeAndLogPerformance('bulk write fuels collection', 'silly', async () => {
         await bulkWriteFuelsCollection(fuelObjectsList, session);
     });

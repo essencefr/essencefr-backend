@@ -88,9 +88,15 @@ async function bulkWriteHistoryCollection(historyObjectsToInsert, historyObjects
  * @param {*} session session object linked to a current mongoose transaction (optionnal)
  */
 async function updateHistoryCollection(stationObjectList, session=null) {
-    const historyObjectsList = generateHistoryObjectList(stationObjectList);
-    const listKnownHistoryIds = await cache.getKnownHistoryIds();
-    const historyObjectListFiltered = filterKnownObjects(historyObjectsList, listKnownHistoryIds);
+    let historyObjectsList = null;
+    await executeAndLogPerformance('generate history object list', 'silly', async () => {
+        historyObjectsList = generateHistoryObjectList(stationObjectList);
+    });
+    let historyObjectListFiltered = null;
+    await executeAndLogPerformance('filter history object list', 'silly', async () => {
+        const listKnownHistoryIds = await cache.getKnownHistoryIds();
+        historyObjectListFiltered = filterKnownObjects(historyObjectsList, listKnownHistoryIds);
+    });
     await executeAndLogPerformance('bulk write history collection', 'silly', async () => {
         await bulkWriteHistoryCollection(historyObjectListFiltered.objectsNew, historyObjectListFiltered.objectsKnown, session);
     });
