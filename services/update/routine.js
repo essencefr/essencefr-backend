@@ -14,12 +14,8 @@ const { processRawData } = require("./collections/all");
  * @param {Number} longitude 
  */
 async function updateRoutineZone(latitude, longitude) {
-    try {
-        const rawData = await fetchStations(latitude, longitude);
-        await processRawData(rawData);
-    } catch (error) {
-        logger.error(error);
-    }
+    const rawData = await fetchStations(latitude, longitude);
+    await processRawData(rawData);
 }
 
 /**
