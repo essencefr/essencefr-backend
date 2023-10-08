@@ -21,20 +21,22 @@ async function processRawData(stationRawObjectList) {
         stationObjectList = convertStationsFormat(stationRawObjectList);
     });
     for(let i=0; i<stationObjectList.length; i++){
-        logger.info(`Processing object ${i}/${stationObjectList.length} (stationId: ${stationObjectList[i]._id})`);
-        try {
-            await runInNewMongooseTransaction(async (session) => {
-                await Promise.all([
-                    updateStationsCollection([stationObjectList[i]], session),
-                    updateHistoryCollection([stationObjectList[i]], session),
-                    updateFuelsCollection([stationRawObjectList[i]], session, true),            
-                    updateBrandsCollection([stationRawObjectList[i]], session, true)
-                ]);
-            });
-        } catch (error) {
-            error.message = 'Process raw data > ' + error.message;  // update error message
-            throw error;  // re-throw
-        };
+        // logger.info(`Processing object ${i+1}/${stationObjectList.length} (stationId: ${stationObjectList[i]._id})`);
+        await executeAndLogPerformance(`Processing object ${i+1}/${stationObjectList.length} (stationId: ${stationObjectList[i]._id})`, 'info', async () => {
+            try {
+                await runInNewMongooseTransaction(async (session) => {
+                    await Promise.all([
+                        updateStationsCollection([stationObjectList[i]], session),
+                        updateHistoryCollection([stationObjectList[i]], session),
+                        updateFuelsCollection([stationRawObjectList[i]], session, true),            
+                        updateBrandsCollection([stationRawObjectList[i]], session, true)
+                    ]);
+                });
+            } catch (error) {
+                error.message = 'Process raw data > ' + error.message;  // update error message
+                throw error;  // re-throw
+            };
+        });
     }
 };
 
