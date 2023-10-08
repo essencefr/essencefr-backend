@@ -11,6 +11,9 @@ const logFileTemp = config.get('logFileTemp');  // temp log file used for API re
 
 // reset temp log file:
 const fs = require('fs');
+if (!fs.existsSync(logDirTemp)){  // i.e. create folder if it does not exist yet
+    fs.mkdirSync(logDirTemp);
+}
 fs.writeFileSync(logDirTemp + logFileTemp, '', err => {
     if (err) { console.error(err); }
 });
