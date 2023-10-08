@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
         logger.error(err);
         res.status(500);
     } finally {
-        res.send(formatLogToValidJSON("log/temp/logging.log"));
+        res.send(formatLogToValidJSON(logDirTemp + logFileTemp));
     }
 });
 
