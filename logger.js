@@ -6,6 +6,12 @@ const config = require('config');
 const winston = require('winston');
 
 const logDir = config.get('logDir');
+const logDirTemp = config.get('logDirTemp');
+const logFileTemp = config.get('logFileTemp');  // temp log file used for API responses
+
+// remove temp log file if it already exists:
+const fs = require('fs');
+fs.unlink(logDirTemp + logFileTemp);
 
 const logger = winston.createLogger({
     level: 'info',
@@ -15,6 +21,7 @@ const logger = winston.createLogger({
         winston.format.json()
     ),
     transports: [
+        new winston.transports.File({ filename: logDirTemp + logFileTemp }),
         new winston.transports.File({ filename: logDir + 'error.log', level: 'error' }),  // Write all logs with importance level of `error` or less to `error.log`
         new winston.transports.File({ filename: logDir + 'combined.log' }),  // Write all logs with importance level of `info` or less to `combined.log`
     ],
