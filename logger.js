@@ -9,9 +9,11 @@ const logDir = config.get('logDir');
 const logDirTemp = config.get('logDirTemp');
 const logFileTemp = config.get('logFileTemp');  // temp log file used for API responses
 
-// remove temp log file if it already exists:
+// reset temp log file:
 const fs = require('fs');
-fs.unlink(logDirTemp + logFileTemp);
+fs.writeFileSync(logDirTemp + logFileTemp, '', err => {
+    if (err) { console.error(err); }
+});
 
 const logger = winston.createLogger({
     level: 'info',

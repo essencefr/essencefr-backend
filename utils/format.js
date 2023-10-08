@@ -13,7 +13,6 @@ function formatLogToValidJSON(file) {
     const content = fs.readFileSync(file).toString();
     const arrayContent = content.split("\r\n").filter(element => element);  // apply a filter that removes empty elements
     const arrayContentJSON = arrayContent.map((value) => JSON.parse(value));
-    console.log(arrayContentJSON);
     return arrayContentJSON;
 }
 
