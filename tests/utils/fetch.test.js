@@ -14,6 +14,6 @@ describe('fetch functions', () => {
             expect(stationRawObjectList.length).toBeGreaterThanOrEqual(1);
             const { error } = validateStationRaw(stationRawObjectList[0]);
             expect(error).toBeUndefined();
-        });
+        }, 10000);  // set timeout to 10 sec since fetch can take up to 5 sec
     });
 });
