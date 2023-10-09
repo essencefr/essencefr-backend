@@ -3,8 +3,6 @@
  */
 
 const mongoose = require('mongoose');
-const { Fuel } = require('../models/fuel');
-const { History } = require('../models/history');
 const { Station } = require('../models/station');
 const { processRawData } = require('../services/update/collections/all');
 const { clearCollections, connectToDB } = require('./common');
@@ -37,16 +35,6 @@ describe('other tests', () => {
 
                 // ensure station doc has been inserted in the DB:
                 let doc = await Station.findById(stationRawObjectList[0].id);
-                expect(doc).toBeDefined();
-                expect(doc).not.toBeNull();
-
-                // ensure history doc has been inserted in the DB:
-                doc = await History.findByStationAndFuelIds(stationRawObjectList[0].id, stationRawObjectList[0].Fuels[0].id);
-                expect(doc).toBeDefined();
-                expect(doc).not.toBeNull();
-
-                // ensure fuel doc has been inserted in the DB:
-                doc = await Fuel.findById(stationRawObjectList[0].Fuels[0].id);
                 expect(doc).toBeDefined();
                 expect(doc).not.toBeNull();
 

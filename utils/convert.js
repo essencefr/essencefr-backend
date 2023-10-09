@@ -64,11 +64,17 @@ function convertStationFormat(stationRawObject) {
     let arrayFuels = [];
     listSupportedFuels.forEach(fuel => {
         if(stationRawObject[fuel.keyInRawData + '_prix'] != null) {
+            const fuelDate = new Date(stationRawObject[fuel.keyInRawData + '_maj'] + '+02:00');  // consider that data is already fetched with dates interpreted at UTC+2 (thus, mongoose will do the conversion to store them at UTC+0)
+            const fuelPrice = stationRawObject[fuel.keyInRawData + '_prix'];
             arrayFuels.push({
                 _id: fuel._id,
                 shortName: fuel.shortName,
-                date: new Date(stationRawObject[fuel.keyInRawData + '_maj'] + '+02:00'),  // consider that data is already fetched with dates interpreted at UTC+2 (thus, mongoose will do the conversion to store them at UTC+0)
-                price: stationRawObject[fuel.keyInRawData + '_prix']
+                date: fuelDate,
+                price: fuelPrice,
+                history: [{  // start to fill history with current price and date
+                    date: fuelDate,
+                    price: fuelPrice,
+                }]
             });
         }
     });

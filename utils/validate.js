@@ -35,4 +35,16 @@ function validateStationRaw(jsonData) {
     return stationRawSchema.validate(jsonData, { allowUnknown: true });  // 'allowUnknown' allows the object to have additional paramaters that are not defined in this schema
 };
 
+/**
+ * Validates the parameters passed in HTTP request on GET station
+ */
+function validateRequestParamsGetStation(reqParams) {
+    // id validation schema (id passed in req params):
+    const idSchema = Joi.object({
+        id: Joi.number().required()
+    });
+    return idSchema.validate(reqParams);
+};
+
 module.exports.validateStationRaw = validateStationRaw;
+module.exports.validateRequestParamsGetStation = validateRequestParamsGetStation;

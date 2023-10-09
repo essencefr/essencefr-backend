@@ -4,18 +4,11 @@
 
 const NodeCache = require('node-cache');
 const { Station } = require('../models/station');
-const { History } = require('../models/history');
-const { Fuel } = require('../models/fuel');
-const { Brand } = require('../models/brand');
-
 
 class MyCache extends NodeCache {
     constructor() {
         super();
         this.keyKnownStationIds = 'knownStationIds';
-        this.keyKnownHistoryIds = 'knownHistoryIds';
-        this.keyKnownFuelIds = 'knownFuelIds';
-        this.keyKnownBrandIds = 'knownBrandIds';
     }
 
     ///// Generic methods : /////
@@ -57,27 +50,7 @@ class MyCache extends NodeCache {
     async getKnownStationIds() { return this.getKnownCollectionIds(this.keyKnownStationIds, Station); }
 
     pushInKnownStationIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownStationIds, idList); }
-
-
-    ///// History ids cache management : /////
-
-    async getKnownHistoryIds() { return this.getKnownCollectionIds(this.keyKnownHistoryIds, History); }
-
-    pushInKnownHistoryIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownHistoryIds, idList); }
-
-
-    ///// Fuel ids cache management : /////
-
-    async getKnownFuelIds() { return this.getKnownCollectionIds(this.keyKnownFuelIds, Fuel); }
-
-    pushInKnownFuelIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownFuelIds, idList); }
-
-
-    ///// Brand ids cache management : /////
-
-    async getKnownBrandIds() { return this.getKnownCollectionIds(this.keyKnownBrandIds, Brand); }
-
-    pushInKnownBrandIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownBrandIds, idList); }
+    
 }
 
 module.exports = new MyCache();

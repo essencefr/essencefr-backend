@@ -55,10 +55,17 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
             updateOne:
             {
                 filter: {
-                    _id: stationObjectsToUpdate[i]._id,
-                    lastUpdate: { $ne: stationObjectsToUpdate[i].lastUpdate }
+                    _id: stationObjectsToUpdate[i]._id
+                },                
+                update: {
+                    $set: { 'name': stationObjectsToUpdate[i].name,
+                            'brand': stationObjectsToUpdate[i].brand,
+                            'address': stationObjectsToUpdate[i].address,
+                            'coordinates': stationObjectsToUpdate[i].coordinates,
+                            'fuels.$[gazole].price': stationObjectsToUpdate[i].fuels[1].price }  // '1' is the gazole id
+                    // $push: { history: historyObjectsToUpdate[i].history[0] }
                 },
-                update: { $set: stationObjectsToUpdate[i] }
+                arrayFilters: [{ 'gazole': { 'fuels._id': 1 } }]
             }
         });
     };

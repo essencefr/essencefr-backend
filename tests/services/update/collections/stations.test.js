@@ -36,7 +36,7 @@ describe('save/update station feature', () => {
             // compare results:
             expect(doc).not.toBeNull();
             expect(doc._id).toEqual(stationObject._id);
-            expect(doc.name).toEqual(stationObject.name);
+            expect(doc.coordinates.latitude).toEqual(stationObject.coordinates.latitude);
         });
         
         test('saving two stations with the same _id should raise an error and none of the stations should be saved into the DB', async () => {
@@ -74,30 +74,15 @@ describe('save/update station feature', () => {
             await bulkWriteStationsCollection([stationObject], []);  // insert document into DB
             const newStationName = "New station name";
             stationObject.name = newStationName;
-            stationObject.lastUpdate = new Date(stationObject.lastUpdate);
-            stationObject.lastUpdate.setDate(stationObject.lastUpdate.getDate() + 1);  // update the field 'lastUpdate' so that modifications will be taken into consideration by the DB
+            stationObject.fuels[0].price = 999;
             await bulkWriteStationsCollection([], [stationObject]);  // update documents
             // read DB:
             const doc = await Station.findById(stationObject._id);
+            console.log(doc);
             // compare results:
             expect(doc).not.toBeNull();
             expect(doc._id).toEqual(stationId);
             expect(doc.name).toEqual(newStationName);
-        });
-
-        test('no update should be made if the last update date has not changed', async () => {
-            let stationObject = convertStationsFormat(stationRawObjectList)[0];
-            const stationId = stationObject._id;
-            await bulkWriteStationsCollection([stationObject], []);  // insert document into DB
-            const newStationName = "New station name";
-            stationObject.name = newStationName;
-            await bulkWriteStationsCollection([], [stationObject]);  // update documents
-            // read DB:
-            const doc = await Station.findById(stationObject._id);
-            // compare results:
-            expect(doc).not.toBeNull();
-            expect(doc._id).toEqual(stationId);
-            expect(doc.name).not.toEqual(newStationName);
         });
     });
 });
