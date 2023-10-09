@@ -2,8 +2,53 @@
  * Module with conversion functions
  */
 
-const cache = require('../services/cache');
-const { validateStationRaw } = require('../models/station');
+const { validateStationRaw } = require('./validate');
+
+// These are the only supported fuels because of the `select` param in the API used: (TODO: store them in the DB)
+const listSupportedFuels = [
+    {
+        "_id": 6,
+        "name": "Super Sans Plomb 98",
+        "shortName": "SP98",
+        "picto": "E5",
+        "keyInRawData": "sp98"
+    },
+    {
+        "_id": 2,
+        "name": "Super Sans Plomb 95",
+        "shortName": "SP95",
+        "picto": "E5",
+        "keyInRawData": "sp95"
+    },
+    {
+        "_id": 4,
+        "name": "GPLc",
+        "shortName": "GPLc",
+        "picto": "LPG",
+        "keyInRawData": "gplc"
+    },
+    {
+        "_id": 1,
+        "name": "Gazole",
+        "shortName": "Gazole",
+        "picto": "B7",
+        "keyInRawData": "gazole"
+    },
+    {
+        "_id": 5,
+        "name": "Super Sans Plomb 95 E10",
+        "shortName": "SP95-E10",
+        "picto": "E10",
+        "keyInRawData": "e10"
+    },
+    {
+        "_id": 3,
+        "name": "Super Ethanol E85",
+        "shortName": "E85",
+        "picto": "E85",
+        "keyInRawData": "e85"
+    }
+];
 
 /**
  * Convert a single station raw object into the format expected by the DB
@@ -16,33 +61,32 @@ function convertStationFormat(stationRawObject) {
         // customMessage = `Error while validating a raw station object: ${error.details[0].message}`;
         throw new Error(`Validation error on raw station object: ${error.details[0].message}`, { error, stationRawObject: value });
     }
+    let arrayFuels = [];
+    listSupportedFuels.forEach(fuel => {
+        if(stationRawObject[fuel.keyInRawData + '_prix'] != null) {
+            arrayFuels.push({
+                _id: fuel._id,
+                shortName: fuel.shortName,
+                date: new Date(stationRawObject[fuel.keyInRawData + '_maj'] + '+02:00'),  // consider that data is already fetched with dates interpreted at UTC+2 (thus, mongoose will do the conversion to store them at UTC+0)
+                price: stationRawObject[fuel.keyInRawData + '_prix']
+            });
+        }
+    });
+    const mostRecentDate = new Date(Math.max(...arrayFuels.map(e => new Date(e.date))));  // get th most recent date among all the dates provided
     const stationObject = {
         _id: stationRawObject.id,
-        name: stationRawObject.name == null ? '' : stationRawObject.name,  // set to '' (empty string) if value is 'null'
-        brand: {
-            _id: stationRawObject.Brand.id,
-            name: stationRawObject.Brand.name
-        },
         address: {
-            streetLine: stationRawObject.Address.street_line,
-            cityLine: stationRawObject.Address.city_line
+            streetLine: stationRawObject.adresse,
+            cityLine: stationRawObject.cp + ' ' + stationRawObject.ville
         },
         coordinates: {
-            latitude: stationRawObject.Coordinates.latitude,
-            longitude: stationRawObject.Coordinates.longitude
+            // divide coordinates by 100000 to convert them into the WGS84  system (usual GPS coordinates)
+            latitude: parseInt(stationRawObject.latitude) / 100000,  // by default latitude is a string (I don't know why, this is a choice made by the gov API)
+            longitude: stationRawObject.longitude / 100000
         },
-        lastUpdate: stationRawObject.LastUpdate.value,
-        fuels: []
+        lastUpdate: mostRecentDate,
+        fuels: arrayFuels
     };
-    stationRawObject.Fuels.forEach(element => {
-        stationObject.fuels.push({
-            _id: element.id,
-            shortName: element.short_name,
-            date: new Date(element.Update.value),
-            available: element.available,
-            price: element.Price.value
-        });
-    });
     return stationObject;
 };
 
@@ -80,61 +124,6 @@ function generateHistoryObject(stationObject) {
     return historyObjects;
 };
 
-/**
- * Generate fuel object(s) from single station object (as many fuel objects as fuel types in given station object)
- * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
- */
-async function generateFuelObject(stationRawObject, bypassValidation = false) {
-    // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
-    if (!bypassValidation) {
-        const { value, error } = validateStationRaw(stationRawObject);
-        if (error) {
-            // throw an error object:
-            throw new Error(`Validation error on raw station object: ${error.details[0].message}`, { error, stationRawObject: value });
-        }
-    }
-    let fuelObjects = [];
-    let fuelObject = null;
-    const listKnownFuelIds = await cache.getKnownFuelIds();
-    for (let i = 0; i < stationRawObject.Fuels.length; i++) {
-        if (!listKnownFuelIds.includes(stationRawObject.Fuels[i].id)) {
-            fuelObject = {
-                _id: stationRawObject.Fuels[i].id,
-                name: stationRawObject.Fuels[i].name,
-                shortName: stationRawObject.Fuels[i].short_name,
-                picto: stationRawObject.Fuels[i].picto
-            }
-            fuelObjects.push(fuelObject);
-            fuelObject = null;
-        }
-    };
-    return fuelObjects;
-};
-
-/**
- * Generate brand object(s) from single station object (as many brand objects as brand types in given station object)
- * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
- */
-async function generateBrandObject(stationRawObject, bypassValidation = false) {
-    // /!\ The following validation can be optionnal ONLY IF the given 'stationRawObject' has already been validated (for example, with the function 'convertStationsFormat' above)
-    if (!bypassValidation) {
-        const { value, error } = validateStationRaw(stationRawObject);
-        if (error) {
-            // throw an error object:
-            throw new Error(`Validation error on raw station object: ${error.details[0].message}`, { error, stationRawObject: value });
-        }
-    }
-    let brandObject = null;
-    const listKnownBrandIds = await cache.getKnownBrandIds();
-    if (!listKnownBrandIds.includes(stationRawObject.Brand.id)) {
-        brandObject = {
-            _id: stationRawObject.Brand.id,
-            name: stationRawObject.Brand.name,
-            shortName: stationRawObject.Brand.short_name
-        }
-    }
-    return brandObject;
-};
 
 /**
  * Wrapper to generate specific objects from multiple input objects
@@ -151,33 +140,5 @@ function generateObjectList(inputObjectList, generationFunction) {
     return [...new Map(objectList.map(v => [JSON.stringify(v), v])).values()];  // returns a list with removed duplicates objects (based on their values)
 };
 
-/**
- * Async wrapper to generate specific objects from multiple input objects
- * @param {Array<Object>} inputObjectList array of objects
- * @param {reference} generationFunction reference to the generation function that should return an object or an array of objects
- */
-async function generateObjectListAsync(inputObjectList, generationFunction) {
-    let objectList = [];
-    await Promise.all(inputObjectList.map(async (element) => {
-        const generated = await generationFunction(element);  // returns an object or an array of objects
-        if (Array.isArray(generated)) { objectList.push(...generated); }
-        else if (generated != null) { objectList.push(generated); }
-    }));    
-    return [...new Map(objectList.map(v => [JSON.stringify(v), v])).values()];  // returns a list with removed duplicates objects (based on their values)
-};
-
-
 module.exports.convertStationsFormat = (inputObjectList) => { return generateObjectList(inputObjectList, convertStationFormat) };
 module.exports.generateHistoryObjectList = (inputObjectList) => { return generateObjectList(inputObjectList, generateHistoryObject) };
-module.exports.generateFuelObjectList = (inputObjectList, bypassValidation = false) => {
-    return generateObjectListAsync(
-        inputObjectList,
-        async (stationRawObject) => { return await generateFuelObject(stationRawObject, bypassValidation); }
-    )
-};
-module.exports.generateBrandObjectList = (inputObjectList, bypassValidation = false) => {
-    return generateObjectListAsync(
-        inputObjectList,
-        async (stationRawObject) => { return await generateBrandObject(stationRawObject, bypassValidation); }
-    )
-};

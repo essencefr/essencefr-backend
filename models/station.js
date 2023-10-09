@@ -9,13 +9,14 @@ const Joi = require('joi');
 
 const Station = mongoose.model('Station', new mongoose.Schema({
     _id: { type: Number, required: true },
-    name: { type: String, default: '' },
+    name: { type: String, default: null },
     brand: {
         type: {
             _id: { type: Number, required: true },
             name: { type: String, required: true }
         },
-        required: true
+        // required: true
+        default: null
     },
     address: {
         type: {
@@ -36,7 +37,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
             _id: { type: Number, required: true, immutable: true },
             shortName: { type: String, required: true },
             date: { type: Date, required: true },
-            available: { type: Boolean, required: true },
+            // available: { type: Boolean, required: true },
             price: { type: Number, required: true }
         }],
         // default: []  // arrays are always '[]' by default in mongoose models
@@ -98,5 +99,5 @@ function validateRequestParams(reqParams) {
 };
 
 module.exports.Station = Station;
-module.exports.validateStationRaw = validateStationRaw;
+// module.exports.validateStationRaw = validateStationRaw;
 module.exports.validateRequestParams = validateRequestParams;

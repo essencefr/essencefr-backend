@@ -37,7 +37,7 @@ describe('convert features', () => {
 
         test('converting an incorrect stationRawObject should raise an error', async () => {
             let stationRawObjectListIncorrect = JSON.parse(JSON.stringify(stationRawObjectList));
-            delete stationRawObjectListIncorrect[0].name;
+            delete stationRawObjectListIncorrect[0].id;
             expect(() => {
                 convertStationsFormat(stationRawObjectListIncorrect);
             }).toThrow(/.* is required/i);
@@ -57,49 +57,6 @@ describe('convert features', () => {
             expect(() => {
                 generateHistoryObjectList(stationRawObjectList);
             }).toThrow();
-        });
-    });
-
-    describe('generate fuel objects', () => {
-        test('generated fuel objects should have the mongoose Schema format defined in models', async () => {
-            const fuelObjectList = await generateFuelObjectList(stationRawObjectList);
-            expect(fuelObjectList.length).toBe(3);
-            const doc = Fuel.hydrate(fuelObjectList[0]);
-            await expect(doc.validate()).resolves.toBeUndefined();
-        });
-
-        test('generating fuel object from station object with wrong format should throw', async () => {
-            const stationRawObjectListIncorrect = JSON.parse(JSON.stringify(stationRawObjectList));
-            delete stationRawObjectListIncorrect[0].Fuels[0].name;
-            await expect(generateFuelObjectList(stationRawObjectListIncorrect)).rejects.toThrow();
-        });
-
-        test('generating a fuel object whose id already exists in the cache memory should return an empty array', async () => {
-            const fuelObjectList = await generateFuelObjectList(stationRawObjectList);
-            await bulkWriteFuelsCollection(fuelObjectList);
-            const fuelObjectList2 = await generateFuelObjectList(stationRawObjectList);
-            expect(fuelObjectList2).toEqual([]);
-        });
-    });
-
-    describe('generate brand objects', () => {
-        test('generated brand objects should have the mongoose Schema format defined in models', async () => {
-            const brandObjectList = await generateBrandObjectList(stationRawObjectList);
-            const doc = Brand.hydrate(brandObjectList[0]);
-            await expect(doc.validate()).resolves.toBeUndefined();
-        });
-
-        test('generating brand object from station object with wrong format should throw', async () => {
-            const stationRawObjectListIncorrect = JSON.parse(JSON.stringify(stationRawObjectList));
-            delete stationRawObjectListIncorrect[0].Brand.name;
-            await expect(generateBrandObjectList(stationRawObjectListIncorrect)).rejects.toThrow();
-        });
-
-        test('generating a brand object whose id already exists in the cache memory should return an empty array', async () => {
-            const brandObjectList = await generateBrandObjectList(stationRawObjectList);
-            await bulkWriteBrandsCollection(brandObjectList);
-            const brandObjectList2 = await generateBrandObjectList(stationRawObjectList);
-            expect(brandObjectList2).toEqual([]);
         });
     });
 });
