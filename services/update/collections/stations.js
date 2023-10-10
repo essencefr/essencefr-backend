@@ -122,7 +122,9 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
     });
     // save the data within a transaction so that no data will be stored if an _id already exists:
     await runInMongooseTransaction(session, async (session) => {
-        await Station.bulkWrite(bulkOperations, { session });
+        await executeAndLogPerformance('mongoose bulkwrite itself', 'silly', async () => {
+            await Station.bulkWrite(bulkOperations, { session });
+        });
     });
 };
 

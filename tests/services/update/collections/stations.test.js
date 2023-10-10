@@ -182,5 +182,30 @@ describe('save/update station feature', () => {
                 }
             }
         });
+
+        test('fuel objects should always be kept in DB even if removed from station object', async () => {
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            await bulkWriteStationsCollection(stationObjectList, []);  // insert document into DB
+            const stationObjectUpdatedList = convertStationsFormat(stationRawObjectListUpdated);
+            // update 'shortName' fields:
+            for (stationObjectUpdated of stationObjectUpdatedList) {
+                delete stationObjectUpdated.fuels[0];  // delete first fuel object
+            }
+            await bulkWriteStationsCollection([], stationObjectUpdatedList);  // update documents
+            // read DB:
+            for (let i=0; i<stationObjectList.length; i++) {
+                const doc = await Station.findById(stationObjectList[i]._id);
+                // compare results:
+                expect(doc).not.toBeNull();
+                expect(doc.address.streetLine).toEqual(stationObjectUpdatedList[i].address.streetLine);  // check a single field to ensure that documents have been updated
+                // fuel.length should not have changed:
+                expect(doc.fuels.length).toEqual(stationObjectList[i].fuels.length);
+            }
+        });
+
+        // test('a new fuel object should be created in the matching existing station document', () => {
+        //     // TODO
+        //     expect(1).toBe(1);
+        // });
     });
 });

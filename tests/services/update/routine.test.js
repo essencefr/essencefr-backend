@@ -4,8 +4,9 @@
 
 const mongoose = require('mongoose');
 const { clearCollections, connectToDB } = require('../../common');
-const { updateRoutineZone } = require('../../../services/update/routine');
-const { Fuel } = require('../../../models/fuel');
+const { processRawData, updateRoutine } = require('../../../services/update/routine');
+const { stationRawObjectList } = require('../../const');
+const { Station } = require('../../../models/station');
 
 
 let cache = null;
@@ -25,16 +26,27 @@ describe('save/update history feature', () => {
         await mongoose.disconnect();
     });
 
-    describe('update routine zone', () => {
-        test('data should be present in the DB anfter updating a zone', async () => {
-            // Pessac coordinates:
-            const latitude = 44.806;
-            const longitude = -0.631;
-            await updateRoutineZone(latitude, longitude);
-            const doc = await Fuel.findById(1);  // At least 'gazole' fuel will very probably be added (id: 1)
+    describe('process raw data', () => {
+        test('data should be present in the DB after processing raw data', async () => {
+            await processRawData(stationRawObjectList);
+            for (let i=0; i<stationRawObjectList.length; i++) {
+                // read DB:
+                const doc = await Station.findById(stationRawObjectList[i].id);
+                expect(doc).toBeDefined();
+                expect(doc).not.toBeNull();
+                expect(doc.address.streetLine).toEqual(stationRawObjectList[i].adresse);  // check a single field just to be sure
+            }
+        });
+    });
+
+    describe('update routine', () => {
+        test('data should be present in the DB after the update routine', async () => {
+            await updateRoutine();
+            // read DB:
+            const doc = await Station.findById(stationRawObjectList[0].id);  // this works because the ids used in extracts come from the real data retrieved from the api
             expect(doc).toBeDefined();
-            expect(doc).not.toBe(null);
-            expect(doc.name).toBe('Gazole');
-        }, 60000);  // set timeout to 1 min
+            expect(doc).not.toBeNull();
+            expect(doc.address.streetLine).toEqual(stationRawObjectList[0].adresse);  // check a single field just to be sure
+        }, 300000);  // set timeout to 5 min
     });
 });

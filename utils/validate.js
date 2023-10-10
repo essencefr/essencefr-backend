@@ -18,7 +18,7 @@ function validateStationRaw(jsonData) {
         }),
 
         adresse: Joi.string().required(),
-        ville: Joi.string().required(),
+        ville: Joi.string().allow(null).required(),
         cp: Joi.string().required(),
 
         gazole_maj: Joi.string().allow(null).required(),

@@ -55,11 +55,13 @@ const listSupportedFuels = [
  * @param {Object} stationRawObject single station object in JSON format such as defined by the government API
  */
 function convertStationFormat(stationRawObject) {
-    const { value, error } = validateStationRaw(stationRawObject);
+    const { error } = validateStationRaw(stationRawObject);
     if (error) {
-        // throw an error object:
-        // customMessage = `Error while validating a raw station object: ${error.details[0].message}`;
-        throw new Error(`Validation error on raw station object: ${error.details[0].message}`, { error, stationRawObject: value });
+        // throw an error object with custom properties:
+        let err = new Error(`Validation error on raw station object: ${error.details[0].message}`);
+        err.error = error;  // 'error' also contains the object given to Joi for validation, so no need to use the following lin (but kept commented for traceability)
+        // err.stationRawObject = value;  // 'value' comes from const { value, error } = validateStationRaw(stationRawObject);
+        throw err;
     }
     let arrayFuels = [];
     listSupportedFuels.forEach(fuel => {
@@ -84,7 +86,7 @@ function convertStationFormat(stationRawObject) {
         brand: null,
         address: {
             streetLine: stationRawObject.adresse,
-            cityLine: stationRawObject.cp + ' ' + stationRawObject.ville
+            cityLine: stationRawObject.cp + ' ' + (stationRawObject.ville ? stationRawObject.ville : '')
         },
         coordinates: {
             latitude: stationRawObject.geom.lat,
