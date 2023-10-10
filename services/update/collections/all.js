@@ -16,6 +16,7 @@ async function processRawData(stationRawObjectList) {
     await executeAndLogPerformance('generate station object list', 'silly', async () => {
         stationObjectList = convertStationsFormat(stationRawObjectList);
     });
+    // do operations station by station to avoid too many mongoose transaction errors:
     for(let i=0; i<stationObjectList.length; i++){
         await executeAndLogPerformance(`Processing object ${i+1}/${stationObjectList.length} (stationId: ${stationObjectList[i]._id})`, 'info', async () => {
             try {

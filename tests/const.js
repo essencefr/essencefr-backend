@@ -164,19 +164,19 @@ const stationRawObjectListUpdated = [
             "lon": 2.35164,  // modified value
             "lat": 49.00764  // modified value
         },
-        // here dates and prices are intentionnally not modified:
-        "gazole_maj": "2023-10-09 07:51:00",
-        "gazole_prix": "1.847",
-        "sp95_maj": "2023-10-09 07:51:00",
-        "sp95_prix": "1.868",
+        // here dates are intentionnally not modified:
+        "gazole_maj": "2023-10-09 07:51:00",  // -> intentionnally not modified
+        "gazole_prix": "1.848",  // modified value
+        "sp95_maj": "2023-10-09 07:51:00",  // -> intentionnally not modified
+        "sp95_prix": "1.870",  // modified value
         "e85_maj": null,
         "e85_prix": null,
         "gplc_maj": null,
         "gplc_prix": null,
-        "e10_maj": "2023-10-09 07:51:00",
-        "e10_prix": "1.817",
-        "sp98_maj": "2023-10-09 07:51:00",
-        "sp98_prix": "1.880",
+        "e10_maj": "2023-10-09 07:51:00",  // -> intentionnally not modified
+        "e10_prix": "1.819",  // modified value
+        "sp98_maj": "2023-10-09 07:51:00",  // -> intentionnally not modified
+        "sp98_prix": "1.888",  // modified value
         "carburants_disponibles": [
             "Gazole",
             "SP95",
