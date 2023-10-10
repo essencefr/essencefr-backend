@@ -4,14 +4,15 @@
 
 const express = require('express');
 const router = express.Router();
-const { Station, validateRequestParams } = require('../models/station');
+const { Station } = require('../models/station');
+const { validateRequestParamsGetStation } = require('../utils/validate');
 
 
 ///// GET methods //////
 
 router.get('/:id', async (req, res) => {
     // validate `id` param:
-    const {error} = validateRequestParams(req.params);
+    const {error} = validateRequestParamsGetStation(req.params);
     if(error) return res.status(400).send(`Validation error: ${error.details[0].message}`);
     // look for station:
     const station = await Station.findById(req.params.id).lean();

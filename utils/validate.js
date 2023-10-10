@@ -41,12 +41,24 @@ function validateStationRaw(jsonData) {
  * Validates the parameters passed in HTTP request on GET station
  */
 function validateRequestParamsGetStation(reqParams) {
-    // id validation schema (id passed in req params):
-    const idSchema = Joi.object({
+    // validation schema (values passed in req params):
+    const paramSchema = Joi.object({
         id: Joi.number().required()
     });
-    return idSchema.validate(reqParams);
+    return paramSchema.validate(reqParams);
+};
+
+/**
+ * Validates the query passed in HTTP request on GET station
+ */
+function validateRequestQueryGetStation(reqQuery) {
+    // validation schema (values passed in req query):
+    const querySchema = Joi.object({
+        history: Joi.boolean()  // this is optional
+    });
+    return querySchema.validate(reqQuery);
 };
 
 module.exports.validateStationRaw = validateStationRaw;
 module.exports.validateRequestParamsGetStation = validateRequestParamsGetStation;
+module.exports.validateRequestQueryGetStation = validateRequestQueryGetStation;
