@@ -14,10 +14,22 @@ const { updateStationsCollection } = require("./collections/stations");
  * @param {Array<Object>} stationRawObjectList raw data provided by the gov API
  * @param {number} bunchSize number of station objects to process together at the same time to increase performance
  * with bunchSize = 50
- *      -> total raw process time = 3 min and very few transaction errors
+ *      -> total raw process time is ~ 3 min and very few transaction errors
  *      -> each process of a bunch of objects takes ~ 1 sec
+ * with bunchSize = 100
+ *      -> total raw process time is ~ 2 min 10 sec and very few transaction errors
+ *      -> each process of a bunch of objects takes ~ 1.3 sec
+ * with bunchSize = 200
+ *      -> total raw process time is ~ 2 min and very few transaction errors
+ *      -> each process of a bunch of objects takes ~ 2.4 sec
+ * with bunchSize = 300
+ *      -> total raw process time is ~ 2 min and very few transaction errors
+ *      -> each process of a bunch of objects takes ~ 3.5 sec
+ * with bunchSize = 500
+ *      -> total raw process time is ~ 2 min and very few transaction errors
+ *      -> each process of a bunch of objects takes ~ 5.7 sec
  */
-async function processRawData(stationRawObjectList, bunchSize=100) {
+async function processRawData(stationRawObjectList, bunchSize=200) {
     let stationObjectList = null;
     await executeAndLogPerformance('generate station object list', 'silly', async () => {
         stationObjectList = convertStationsFormat(stationRawObjectList);
@@ -26,16 +38,18 @@ async function processRawData(stationRawObjectList, bunchSize=100) {
     for(let i=0; i<stationObjectList.length; i+=bunchSize){
         const indexMax = (i+bunchSize < stationObjectList.length) ? i+bunchSize : stationObjectList.length-1;
         await executeAndLogPerformance(`Processing object(s) ${i+1} to ${indexMax+1} over ${stationObjectList.length}`, 'info', async () => {
-            try {
-                await runInNewMongooseTransaction(async (session) => {
-                    await updateStationsCollection(stationObjectList.slice(i, indexMax), session);
-                });
-            } catch (error) {
-                error.message = 'Process raw data > ' + error.message;  // update error message
-                logger.error(error);
-                // throw error;  // re-throw
-            };
-        });
+            await executeAndLogPerformance(`Processing object(s)`, 'info', async () => {
+                try {
+                    await runInNewMongooseTransaction(async (session) => {
+                        await updateStationsCollection(stationObjectList.slice(i, indexMax+1), session);
+                    });
+                } catch (error) {
+                    error.message = 'Process raw data > ' + error.message;  // update error message
+                    logger.error(error);  // do not re-throw error, just log it and process the next bunch ob objects
+                    // throw error;  // re-throw
+                };
+            });
+        })
     }
 };
 
@@ -47,12 +61,12 @@ async function updateRoutine() {
     try {
         const rawData = await fetchStations();
         await executeAndLogPerformance('Process raw data', 'info', async () => {
-            await processRawData(rawData.slice(0, 200));  // TODO remove this limit. Only consider the first 200 objects for test purposes
+            await processRawData(rawData);
         });
     } catch (err) {
         logger.error(err);
     }
 }
 
-module.exports.processRawData = async (stationRawObjectList, bunchSize=100) => { await executeAndLogPerformance('Process raw data', 'info', async () => { await processRawData(stationRawObjectList, bunchSize) }) };
+module.exports.processRawData = async (stationRawObjectList, bunchSize=200) => { await executeAndLogPerformance('Process raw data', 'info', async () => { await processRawData(stationRawObjectList, bunchSize) }) };
 module.exports.updateRoutine = async () => { await executeAndLogPerformance('Update routine', 'info', async () => { await updateRoutine() }) };
