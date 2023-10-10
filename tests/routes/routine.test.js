@@ -30,7 +30,7 @@ describe('/api/routine', () => {
     });
 
     describe('POST /', () => {
-        test('should return the complete log on correct execution', async () => {
+        test('should return status 200 on correct execution', async () => {
             const res = await request(server).post(`/api/routine`);
             console.log(res);
             // TODO

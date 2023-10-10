@@ -3,16 +3,10 @@
  */
 
 const fs = require('fs');
-const config = require('config');
 const logger = require('../logger');
 const express = require('express');
 const router = express.Router();
 const { updateRoutine } = require('../services/update/routine');
-const { formatLogToValidJSON } = require('../utils/format');
-
-// temp log file used for API responses:
-const logDirTemp = config.get('logDirTemp');
-const logFileTemp = config.get('logFileTemp');
 
 ///// POST methods //////
 
@@ -23,11 +17,10 @@ router.post('/', async (req, res) => {
             if (err) { console.error(err); }
         });
         await updateRoutine();
+        res.send('Update routine success');
     } catch (err) {
         logger.error(err);
-        res.status(500);
-    } finally {
-        res.send(formatLogToValidJSON(logDirTemp + logFileTemp));
+        res.status(500).send(err);
     }
 });
 
