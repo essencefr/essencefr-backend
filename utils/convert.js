@@ -78,19 +78,18 @@ function convertStationFormat(stationRawObject) {
             });
         }
     });
-    const mostRecentDate = new Date(Math.max(...arrayFuels.map(e => new Date(e.date))));  // get th most recent date among all the dates provided
     const stationObject = {
         _id: stationRawObject.id,
+        name: null,
+        brand: null,
         address: {
             streetLine: stationRawObject.adresse,
             cityLine: stationRawObject.cp + ' ' + stationRawObject.ville
         },
         coordinates: {
-            // divide coordinates by 100000 to convert them into the WGS84  system (usual GPS coordinates)
-            latitude: parseInt(stationRawObject.latitude) / 100000,  // by default latitude is a string (I don't know why, this is a choice made by the gov API)
-            longitude: stationRawObject.longitude / 100000
+            latitude: stationRawObject.geom.lat,
+            longitude: stationRawObject.geom.lon
         },
-        lastUpdate: mostRecentDate,
         fuels: arrayFuels
     };
     return stationObject;

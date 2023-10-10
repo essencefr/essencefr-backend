@@ -12,8 +12,10 @@ function validateStationRaw(jsonData) {
     const stationRawSchema = Joi.object({
         id: Joi.number().required(),
 
-        latitude: Joi.string().required(),
-        longitude: Joi.number().required(),
+        geom: Joi.object().required().keys({
+            lat: Joi.number().required(),
+            lon: Joi.number().required(),
+        }),
 
         adresse: Joi.string().required(),
         ville: Joi.string().required(),

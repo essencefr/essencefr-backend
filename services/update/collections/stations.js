@@ -58,14 +58,61 @@ async function bulkWriteStationsCollection(stationObjectsToInsert, stationObject
                     _id: stationObjectsToUpdate[i]._id
                 },                
                 update: {
-                    $set: { 'name': stationObjectsToUpdate[i].name,
+                    $set: (() => {
+                        // construct the 'set' field:
+                        let setObject = {
+                            'name': stationObjectsToUpdate[i].name,                    
                             'brand': stationObjectsToUpdate[i].brand,
                             'address': stationObjectsToUpdate[i].address,
-                            'coordinates': stationObjectsToUpdate[i].coordinates,
-                            'fuels.$[gazole].price': stationObjectsToUpdate[i].fuels[1].price }  // '1' is the gazole id
-                    // $push: { history: historyObjectsToUpdate[i].history[0] }
+                            'coordinates': stationObjectsToUpdate[i].coordinates
+                        };                        
+                        let filterName = null;
+                        stationObjectsToUpdate[i].fuels.forEach((fuel) => {
+                            filterName = `filter${fuel._id}`;  // use the fuel 'id' as filter name since this is the only immutable field in a fuel object
+
+                            // change fuel shortName field only for matching fuels:
+                            setObject[`fuels.$[${filterName}idonly].shortName`] = fuel.shortName;
+
+                            // change fuel prices and dates only if the new date is more recent than the one already saved into the DB:
+                            setObject[`fuels.$[${filterName}].price`] = fuel.price;
+                            setObject[`fuels.$[${filterName}].date`] = fuel.date;
+                            filterName = null;
+                        });
+                        return setObject;
+                    })(),
+                    $push: (() => {
+                        // construct the 'push' field:
+                        let pushObject = {};
+                        stationObjectsToUpdate[i].fuels.forEach((fuel) => {
+                            // push new object inhistory only if the new date is more recent than the one already saved into the DB:
+                            pushObject[`fuels.$[filter${fuel._id}].history`] = { date: fuel.date, price: fuel.price };
+                        });
+                        return pushObject;
+                    })()
                 },
-                arrayFilters: [{ 'gazole': { 'fuels._id': 1 } }]
+                arrayFilters: (() => {
+                    // construct the array filters:
+                    let arrayFilters = [];
+                    let filterObject = {};
+                    let filterName = null;
+                    stationObjectsToUpdate[i].fuels.forEach((fuel) => {
+                        filterName = `filter${fuel._id}`;  // use the fuel 'id' as filter name since this is the only immutable field in a fuel object
+
+                        // create filter to change fuel shortName field only for matching fuels:
+                        filterObject[`${filterName}idonly._id`] = fuel._id;
+                        arrayFilters.push(filterObject);
+                        filterObject = {};  // reset value
+
+                        // create filter to change fuel prices and dates only if the new date is more recent than the one already saved into the DB:
+                        filterObject[`${filterName}._id`] = fuel._id;
+                        filterObject[`${filterName}.date`] = { $lt: fuel.date };
+                        arrayFilters.push(filterObject);
+                        filterObject = {};  // reset value
+
+                        filterName = null;  // reset value
+                    });
+                    return arrayFilters;
+                })()
             }
         });
     };

@@ -36,7 +36,24 @@ describe('save/update station feature', () => {
             // compare results:
             expect(doc).not.toBeNull();
             expect(doc._id).toEqual(stationObject._id);
+            expect(doc.name).toEqual(stationObject.name);
+            expect(doc.name).toEqual(null);  // name should be null (default value)
+            expect(doc.brand).toEqual(stationObject.brand);
+            expect(doc.brand).toEqual(null);  // name should be null (default value)
+            expect(doc.address.streetLine).toEqual(stationObject.address.streetLine);
+            expect(doc.address.cityLine).toEqual(stationObject.address.cityLine);
             expect(doc.coordinates.latitude).toEqual(stationObject.coordinates.latitude);
+            expect(doc.coordinates.longitude).toEqual(stationObject.coordinates.longitude);
+            expect(doc.fuels.length).toEqual(stationObject.fuels.length);
+            for (let i=0; i<doc.fuels.length; i++) {
+                expect(doc.fuels[i]._id).toEqual(stationObject.fuels[i]._id);
+                expect(doc.fuels[i].shortName).toEqual(stationObject.fuels[i].shortName);
+                expect(doc.fuels[i].date).toEqual(stationObject.fuels[i].date);
+                for (let j=0; j<doc.fuels[i].history.length; j++) {
+                    expect(doc.fuels[i].history[j].date).toEqual(stationObject.fuels[i].history[j].date);
+                    expect(doc.fuels[i].history[j].price).toEqual(stationObject.fuels[i].history[j].price);
+                }
+            }
         });
         
         test('saving two stations with the same _id should raise an error and none of the stations should be saved into the DB', async () => {
@@ -78,7 +95,6 @@ describe('save/update station feature', () => {
             await bulkWriteStationsCollection([], [stationObject]);  // update documents
             // read DB:
             const doc = await Station.findById(stationObject._id);
-            console.log(doc);
             // compare results:
             expect(doc).not.toBeNull();
             expect(doc._id).toEqual(stationId);
