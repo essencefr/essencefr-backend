@@ -84,6 +84,28 @@ describe('save/update station feature', () => {
             expect(doc).not.toBeNull();
             expect(doc.newField).toBeUndefined();
         });
+
+        test('saving a station object with an empty array as history field should throw', async () => {
+            const stationObject = convertStationsFormat(stationRawObjectList)[0];
+            stationObject.fuels[0].history = [];
+            await expect(bulkWriteStationsCollection([stationObject], [])).rejects.toThrow(/validation failed/i);
+            // read DB:
+            const doc = await Station.findById(stationObject._id);
+            // compare results:
+            expect(doc).toBeNull();
+            expect([[], undefined]).toContain(cache.get(cache.keyKnownStationIds));
+        });
+
+        test('saving a station object with inconsistent date in fuel history vs fuel current should throw', async () => {
+            const stationObject = convertStationsFormat(stationRawObjectList)[0];
+            stationObject.fuels[0].date = new Date('2023-01-01T00:00:00');
+            await expect(bulkWriteStationsCollection([stationObject], [])).rejects.toThrow(/validation failed/i);
+            // read DB:
+            const doc = await Station.findById(stationObject._id);
+            // compare results:
+            expect(doc).toBeNull();
+            expect([[], undefined]).toContain(cache.get(cache.keyKnownStationIds));
+        });
     });
 
     describe('update station data into database', () => {

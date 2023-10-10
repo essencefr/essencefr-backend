@@ -42,18 +42,25 @@ const Station = mongoose.model('Station', new mongoose.Schema({
                     date: { type: Date, required: true },
                     price: { type: Number, required: true }
                 }],
-                required: true,
-                validate: [
-                    // custom validator -> an history can never be empty:
-                    {
-                        validator: function (value) { return value.length >= 1; },
-                        message: function (props) { return `${props.path} must have length >= 1, got '${props.value}'`; }
-                    }
-                ]
+                required: true
             }
         }],
         required: true,
         validate: [
+            // custom validator -> an history can never be empty:
+            {
+                validator: function (value) {                    
+                    let status = true;
+                    for(let i=0; i<value.length; i++) {
+                        if (value[i].history.length == 0) {
+                            status = false;
+                            break;
+                        }
+                    }
+                    return status;
+                },
+                message: function (props) { return `history in ${props.path} must have length >= 1, got '${props.value}'`; }
+            },
             // custom validator -> the last history entry's date must match the fuel current date:
             {
                 validator: function (value) {
