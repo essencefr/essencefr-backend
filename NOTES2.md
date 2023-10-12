@@ -13,3 +13,7 @@ Voici l'API à appeler pour exporter l'ensemble des prix en temps réel:
 ```
 https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json?limit=-1&timezone=Europe%2FParis&select=id%2C%20latitude%2C%20longitude%2C%20cp%2C%20adresse%2C%20ville%2C%20gazole_maj%2C%20gazole_prix%2C%20sp95_maj%2C%20sp95_prix%2C%20e85_maj%2C%20e85_prix%2C%20gplc_maj%2C%20gplc_prix%2C%20e10_maj%2C%20e10_prix%2C%20sp98_maj%2C%20sp98_prix
 ```
+
+Similar service using a map of France: https://explore.data.gouv.fr/prix-carburants
+
+The tile server it is based on: https://openmaptiles.geo.data.gouv.fr/ (does it have an API I can use?)

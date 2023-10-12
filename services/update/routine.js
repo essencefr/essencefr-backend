@@ -3,11 +3,56 @@
  */
 
 const logger = require("../../logger");
+const { CronJob } = require("cron");
 const { convertStationsFormat } = require("../../utils/convert");
 const { fetchStations } = require("../../utils/fetch");
 const { executeAndLogPerformance } = require("../../utils/timer");
 const { runInNewMongooseTransaction } = require("../../utils/transactions");
 const { updateStationsCollection } = require("./collections/stations");
+const { sendMail } = require("../../utils/email");
+
+
+const mailOptions = {
+    from: `essencefr-backend <${process.env.GIT_GMAIL_ADDR}>`, // sender address
+    to: process.env.ESSENCEFR_EMAIL_ADDR, // receiver email
+    subject: "Send email in Node.JS with Nodemailer using Gmail account", // Subject line
+    text: "routine message",
+    html: "routine message",
+    attachments: [
+      { // file on disk as an attachment
+        filename: 'text3.txt',
+        path: './_temp/temp.txt' // stream this file
+      }
+    ]
+}
+
+// Cron job to automatically run the update function
+const updateJob = new CronJob(
+	'*/15 * * * * *',
+	async () => {
+        await updateRoutine();
+        sendMail(mailOptions, (info) => {
+            console.log("Email sent successfully");
+            console.log("MESSAGE ID: ", info.messageId);
+        });
+    },
+	null,   // callback to execute when cron job is stopeed (defualt value)
+	false,  // only start the job when `.start()` is called (default value)
+	'Europe/Paris'  // timezone to use to define execution time
+);
+// const updateJob = new CronJob(
+// 	'*/5 * * * * *',
+// 	async () => {
+//         await updateRoutine();
+//         sendMail(mailOptions, (info) => {
+//             console.log("Email sent successfully");
+//             console.log("MESSAGE ID: ", info.messageId);
+//         });
+//     },
+// 	null,  //
+// 	false,  // only start the job when `.start()` is called
+// 	'Europe/Paris'
+// );
 
 /**
  * Takes stations raw data and save/update documents in the DB
@@ -61,7 +106,7 @@ async function updateRoutine() {
     try {
         const rawData = await fetchStations();
         await executeAndLogPerformance('Process raw data', 'info', async () => {
-            await processRawData(rawData);
+            await processRawData(rawData.slice(0, 5));  // TODO remove slice -> this was for test purposes
         });
     } catch (err) {
         logger.error(err);
@@ -70,3 +115,4 @@ async function updateRoutine() {
 
 module.exports.processRawData = async (stationRawObjectList, bunchSize=200) => { await executeAndLogPerformance('Process raw data', 'info', async () => { await processRawData(stationRawObjectList, bunchSize) }) };
 module.exports.updateRoutine = async () => { await executeAndLogPerformance('Update routine', 'info', async () => { await updateRoutine() }) };
+module.exports.updateJob = updateJob;
