@@ -7,6 +7,7 @@ const { convertStationsFormat } = require('../../utils/convert');
 const { filterKnownObjects } = require('../../utils/filter');
 const { stationRawObjectList } = require('../const');
 const { clearCollections, connectToDB } = require('../common');
+const { bulkWriteStationsCollection } = require('../../services/update/collections/stations');
 
 let cache = null;
 
@@ -27,7 +28,7 @@ describe('save/update history feature', () => {
 
     describe('filter feature', () => {
         test('an unknown station data object should be correctly filtered as new', async () => {
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            const stationObjectList = [convertStationsFormat(stationRawObjectList)[0]];
             const listKnownStationIds = await cache.getKnownStationIds();
             const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);
             expect(stationObjectListFiltered).toBeDefined();
@@ -36,8 +37,7 @@ describe('save/update history feature', () => {
         });
     
         test('an already known station data object should be correctly filtered as known', async () => {
-            const { bulkWriteStationsCollection } = require('../../services/update/collections/stations');
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            const stationObjectList = [convertStationsFormat(stationRawObjectList)[0]];
             await bulkWriteStationsCollection(stationObjectList, []);
             const listKnownStationIds = await cache.getKnownStationIds();
             const stationObjectListFiltered = filterKnownObjects(stationObjectList, listKnownStationIds);

@@ -133,7 +133,7 @@ describe('save/update station feature', () => {
             const stationObjectUpdated = convertStationsFormat(stationRawObjectListUpdated)[0];  // use the second object in which dates fields are modified
             await bulkWriteStationsCollection([], [stationObjectUpdated]);  // update documents
             // read DB:
-            const doc = await Station.findById(stationObject._id);
+            const doc = await Station.findById(stationObject._id).select('+fuels.history');  // explicitly include history in the response (not included by default)
             // compare results:
             expect(doc).not.toBeNull();
             // fuel.length should not have changed:
@@ -161,7 +161,7 @@ describe('save/update station feature', () => {
             const stationObjectUpdated = convertStationsFormat(stationRawObjectListUpdated)[1];  // use the second object in which all fields but dates are modified
             await bulkWriteStationsCollection([], [stationObjectUpdated]);  // update documents
             // read DB:
-            const doc = await Station.findById(stationObject._id);
+            const doc = await Station.findById(stationObject._id).select('+fuels.history');  // explicitly include history in the response (not included by default)
             // compare results:
             expect(doc).not.toBeNull();
             // fuel.length should not have changed:

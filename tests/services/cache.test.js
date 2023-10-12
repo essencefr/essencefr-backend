@@ -4,7 +4,7 @@
 
 const mongoose = require('mongoose');
 const { Station } = require('../../models/station');;
-const { processRawData } = require('../../services/update/collections/all');
+const { processRawData } = require('../../services/update/routine');
 const { clearCollections, connectToDB } = require('../common');
 const { stationRawObjectList } = require('../const');
 
