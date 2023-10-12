@@ -76,7 +76,7 @@ async function updateRoutine() {
         cleanFiles(config.get('logDirCurrent'));  // reset current log files
         const rawData = await fetchStations();
         await executeAndLogPerformance('Process raw data', 'info', async () => {
-            await processRawData(rawData.slice(0, 5));  // TODO remove slice -> this was for test purposes
+            await processRawData(rawData);
         });
     } catch (err) {
         logger.error(err);
