@@ -83,14 +83,20 @@ describe('/api/stations', () => {
         });
 
         test('a non-boolean value for \'history\' in query should return 400', async () => {
-            // fill the DB:
-            const stationId = stationRawObjectList[0].id;
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            await bulkWriteStationsCollection(stationObjectList, []);
+            const stationId = 1;
             // perform requests:
             let res = await request(server).get(`/api/stations/${stationId}?history=1`);
             expect(res.status).toBe(400);
             res = await request(server).get(`/api/stations/${stationId}?history=a`);
+            expect(res.status).toBe(400);
+        });
+
+        test('an unexpected field in query should return 400', async () => {
+            const stationId = 1;
+            // perform requests:
+            let res = await request(server).get(`/api/stations/${stationId}?unexpected=1`);
+            expect(res.status).toBe(400);
+            res = await request(server).get(`/api/stations/${stationId}?history=true&unexpected=1`);
             expect(res.status).toBe(400);
         });
     });

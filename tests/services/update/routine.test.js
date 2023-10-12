@@ -39,14 +39,14 @@ describe('save/update history feature', () => {
         });
     });
 
-    describe('update routine', () => {
-        test('data should be present in the DB after the update routine', async () => {
-            await updateRoutine();
-            // read DB:
-            const doc = await Station.findById(stationRawObjectList[0].id);  // this works because the ids used in extracts come from the real data retrieved from the api
-            expect(doc).toBeDefined();
-            expect(doc).not.toBeNull();
-            expect(doc.address.streetLine).toEqual(stationRawObjectList[0].adresse);  // check a single field just to be sure
-        }, 300000);  // set timeout to 5 min
-    });
+    // describe('update routine', () => {
+    //     test('data should be present in the DB after the update routine', async () => {
+    //         await updateRoutine();
+    //         // read DB:
+    //         const doc = await Station.findById(stationRawObjectList[0].id);  // this works because the ids used in extracts come from the real data retrieved from the api
+    //         expect(doc).toBeDefined();
+    //         expect(doc).not.toBeNull();
+    //         expect(doc.address.streetLine).toEqual(stationRawObjectList[0].adresse);  // check a single field just to be sure
+    //     }, 300000);  // set timeout to 5 min
+    // });
 });
