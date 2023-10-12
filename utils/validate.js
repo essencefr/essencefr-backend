@@ -54,7 +54,11 @@ function validateRequestParamsGetStation(reqParams) {
 function validateRequestQueryGetStation(reqQuery) {
     // validation schema (values passed in req query):
     const querySchema = Joi.object({
-        history: Joi.boolean()  // this is optional
+        history: Joi.boolean(),  // this is optional
+        fuelId: Joi.alternatives().try(  // can be either a number or an array of numbers
+            Joi.number(),
+            Joi.array().min(1).items(Joi.number())
+        )  // this is optional
     });
     return querySchema.validate(reqQuery);
 };

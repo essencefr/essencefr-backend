@@ -42,7 +42,7 @@ describe('/api/stations', () => {
             expect(res.body.address.streetLine).toEqual(stationAddress);
         });
 
-        test('history fields should not be return in the response body by default', async () => {
+        test('history fields should not be returned in the response body by default', async () => {
             // define the raw data object:
             const stationId = stationRawObjectList[0].id;
             const stationObjectList = convertStationsFormat(stationRawObjectList);
@@ -54,6 +54,19 @@ describe('/api/stations', () => {
             for (let i=0; i<res.body.fuels.length; i++) {
                 expect(res.body.fuels[i].history).toBeUndefined();
             }
+        });
+
+        test('all fuels objects should be returned in the response by default', async () => {
+            // define the raw data object:
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            const stationId = stationObjectList[0]._id;
+            const nbOfFuels = stationObjectList[0].fuels.length;
+            await bulkWriteStationsCollection(stationObjectList, []);
+            // read database through api endpoint:
+            let res = await request(server).get(`/api/stations/${stationId}`);
+            // compare results:
+            expect(res.status).toBe(200);
+            expect(res.body.fuels.length).toEqual(nbOfFuels);
         });
         
         test('should throw 404 when id is unknwon', async () => {
@@ -67,37 +80,103 @@ describe('/api/stations', () => {
         });
     });
 
-    describe('GET /:id?query', () => {
-        test('history fields should be return in the response body if explicitly required', async () => {
-            // define the raw data object:
-            const stationId = stationRawObjectList[0].id;
-            const stationObjectList = convertStationsFormat(stationRawObjectList);
-            await bulkWriteStationsCollection(stationObjectList, []);
-            // read database through api endpoint:
-            const res = await request(server).get(`/api/stations/${stationId}?history=true`);
-            // compare results:
-            expect(res.status).toBe(200);
-            for (let i=0; i<res.body.fuels.length; i++) {
-                expect(res.body.fuels[i].history).not.toBeUndefined();
-            }
-        });
-
-        test('a non-boolean value for \'history\' in query should return 400', async () => {
-            const stationId = 1;
-            // perform requests:
-            let res = await request(server).get(`/api/stations/${stationId}?history=1`);
-            expect(res.status).toBe(400);
-            res = await request(server).get(`/api/stations/${stationId}?history=a`);
-            expect(res.status).toBe(400);
-        });
-
+    describe('GET /:id?query', () => {        
         test('an unexpected field in query should return 400', async () => {
-            const stationId = 1;
             // perform requests:
-            let res = await request(server).get(`/api/stations/${stationId}?unexpected=1`);
+            let res = await request(server).get(`/api/stations/${1}?unexpected=1`);
             expect(res.status).toBe(400);
-            res = await request(server).get(`/api/stations/${stationId}?history=true&unexpected=1`);
+            res = await request(server).get(`/api/stations/${1}?history=true&unexpected=1`);
             expect(res.status).toBe(400);
+        });
+
+        describe('query with \'history\'', () => {            
+            test('history fields should be returned in the response body if explicitly required', async () => {
+                // define the raw data object:
+                const stationId = stationRawObjectList[0].id;
+                const stationObjectList = convertStationsFormat(stationRawObjectList);
+                await bulkWriteStationsCollection(stationObjectList, []);
+                // read database through api endpoint:
+                const res = await request(server).get(`/api/stations/${stationId}?history=true`);
+                // compare results:
+                expect(res.status).toBe(200);
+                for (let i=0; i<res.body.fuels.length; i++) {
+                    expect(res.body.fuels[i].history).not.toBeUndefined();
+                }
+            });
+    
+            test('a non-boolean value for \'history\' in query should return 400', async () => {
+                // perform requests:
+                let res = await request(server).get(`/api/stations/${1}?history=1`);
+                expect(res.status).toBe(400);
+                res = await request(server).get(`/api/stations/${1}?history=a`);
+                expect(res.status).toBe(400);
+            });
+        });
+
+        describe('query with \'fuelId\'', () => {
+            test('single required fuel should be returned in the response body if explicitly specified', async () => {
+                // define the raw data object:
+                const stationId = stationRawObjectList[0].id;                
+                const stationObjectList = convertStationsFormat(stationRawObjectList);
+                const fuelIdList = stationObjectList[0].fuels.map(object => object._id);
+                await bulkWriteStationsCollection(stationObjectList, []);
+                // read database through api endpoint:
+                let res = await request(server).get(`/api/stations/${stationId}?fuelId=${fuelIdList[0]}`);
+                // compare results:
+                expect(res.status).toBe(200);
+                expect(res.body.fuels.length).toBe(1);
+            });
+
+            test('multiple required fuels should be returned in the response body if explicitly specified', async () => {
+                // define the raw data object:
+                const stationId = stationRawObjectList[0].id;                
+                const stationObjectList = convertStationsFormat(stationRawObjectList);
+                const fuelIdList = stationObjectList[0].fuels.map(object => object._id);
+                await bulkWriteStationsCollection(stationObjectList, []);
+                // read database through api endpoint:
+                const res = await request(server).get(`/api/stations/${stationId}?fuelId=${fuelIdList[0]}&fuelId=${fuelIdList[1]}`);
+                // compare results:
+                expect(res.status).toBe(200);
+                expect(res.body.fuels.length).toBe(2);
+            });
+
+            test('unexpected value should return 400', async () => {
+                // perform requests:
+                let res = await request(server).get(`/api/stations/${1}?fuelId=a`);
+                expect(res.status).toBe(400);
+                res = await request(server).get(`/api/stations/${1}?fuelId=${1}&fuelId=a`);
+                expect(res.status).toBe(400);
+            });
+
+            test('unkown fuel id for the given station should return 404', async () => {
+                // define the raw data object:
+                const stationId = stationRawObjectList[0].id;                
+                const stationObjectList = convertStationsFormat(stationRawObjectList);
+                await bulkWriteStationsCollection(stationObjectList, []);
+                // perform requests:
+                let res = await request(server).get(`/api/stations/${stationId}?fuelId=999`);
+                expect(res.status).toBe(404);
+                res = await request(server).get(`/api/stations/${stationId}?fuelId=1&fuelId=999`);
+                expect(res.status).toBe(404);
+            });
+        });
+
+        describe('query with \'history\' AND \'fuelId\'', () => {
+            test('history should be returned for every required fuel', async () => {
+                // define the raw data object:               
+                const stationObjectList = convertStationsFormat(stationRawObjectList);
+                const stationId = stationObjectList[0]._id;
+                const fuelIdList = stationObjectList[0].fuels.map(object => object._id);
+                await bulkWriteStationsCollection(stationObjectList, []);
+                // read database through api endpoint:
+                let res = await request(server).get(`/api/stations/${stationId}?history=true&fuelId=${fuelIdList[0]}&fuelId=${fuelIdList[1]}`);
+                // compare results:
+                expect(res.status).toBe(200);
+                expect(res.body.fuels.length).toBe(2);  // only 2 fuels are required
+                for (let i=0; i<res.body.fuels.length; i++) {
+                    expect(res.body.fuels[i].history).not.toBeUndefined();
+                }
+            });
         });
     });
 });

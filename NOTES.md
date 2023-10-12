@@ -126,25 +126,22 @@ Here's my data format for storing a station details:
             "id": 1,
             "shortName": "Gazole",
             "date": "2023-09-18T07:26:15Z",     // timestamp of last known price/avaiability update
-            "available": true,                  // 'false' if there is a rupture
             "price": 1.989,                     // last known price value
-            "historyId": ObjectId('xxx')        // reference id to the history document
+            "historyId": Array                  // an array
         },
         {
             "id": 5,
             "shortName": "SP95-E10",
             "date": "2023-09-18T07:26:16Z",
-            "available": true,
             "price": 1.969,
-            "historyId": ObjectId('xxx')
+            "history": Array
         },
         {
             "id": 6,
             "shortName": "SP98",
             "date": "2023-09-18T07:26:16Z",
-            "available": true,
             "price": 2.019,
-            "historyId": ObjectId('xxx')
+            "history": Array
         }
     ]
 }
