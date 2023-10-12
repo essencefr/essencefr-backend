@@ -2,6 +2,6 @@
     "port": 3000,
     "dbConnectionString": "mongodb://0.0.0.0:27017/essencefr",
     "logDir": "./log/",
-    "logDirTemp": "./log/temp/",
-    "logFileTemp": "temp_logging.log"
+    "logDirArchive": "./log/archive/",
+    "logDirCurrent": "./log/current/"
 }

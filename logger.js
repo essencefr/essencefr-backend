@@ -3,20 +3,21 @@
  */
 
 const config = require('config');
+const fs = require('fs');
 const winston = require('winston');
+require('winston-daily-rotate-file');
+const { cleanFiles } = require('./utils/files');
 
 const logDir = config.get('logDir');
-const logDirTemp = config.get('logDirTemp');
-const logFileTemp = config.get('logFileTemp');  // temp log file used for API responses
+const logDirArchive = config.get('logDirArchive');
+const logDirCurrent = config.get('logDirCurrent');
 
-// reset temp log file:
-const fs = require('fs');
 // create folders if they do not exist yet
-if (!fs.existsSync(logDir)){ fs.mkdirSync(logDir) }
-if (!fs.existsSync(logDirTemp)){ fs.mkdirSync(logDirTemp) }
-fs.writeFileSync(logDirTemp + logFileTemp, '', err => {
-    if (err) { console.error(err); }
-});
+if (!fs.existsSync(logDir)) { fs.mkdirSync(logDir) }
+if (!fs.existsSync(logDirCurrent)) { fs.mkdirSync(logDirCurrent) }
+if (!fs.existsSync(logDirArchive)) { fs.mkdirSync(logDirArchive) }
+// reset current log files:
+cleanFiles(logDirCurrent);
 
 const logger = winston.createLogger({
     level: 'info',
@@ -26,15 +27,46 @@ const logger = winston.createLogger({
         winston.format.json()
     ),
     transports: [
-        new winston.transports.File({ filename: logDirTemp + logFileTemp }),
-        new winston.transports.File({ filename: logDir + 'error.log', level: 'error' }),  // Write all logs with importance level of `error` or less to `error.log`
-        new winston.transports.File({ filename: logDir + 'combined.log' }),  // Write all logs with importance level of `info` or less to `combined.log`
+        // Transports for current logs:
+        new winston.transports.File({ filename: logDirCurrent + 'error.log', level: 'error' }),  // Write all logs with importance level of `error` or less to `error.log`
+        new winston.transports.File({ filename: logDirCurrent + 'combined.log' }),  // Write all logs with importance level of `info` or less to `combined.log`
+        // Transports for rotated logs:
+        new winston.transports.DailyRotateFile({
+            filename: logDirArchive + '%DATE%_error.log',
+            level: 'error',
+            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            maxSize: '20m',
+            maxFiles: '14d'
+        }),
+        new winston.transports.DailyRotateFile({
+            filename: logDirArchive + '%DATE%_combined.log',
+            level: 'info',
+            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            maxSize: '20m',
+            maxFiles: '14d'
+        }),
     ],
     exceptionHandlers: [
-        new winston.transports.File({ filename: logDir + 'exceptions.log' })
+        // Transport for current logs:
+        new winston.transports.File({ filename: logDirCurrent + 'exceptions.log' }),
+        // Transport for rotated logs:
+        new winston.transports.DailyRotateFile({
+            filename: logDirArchive + '%DATE%_exceptions.log',
+            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            maxSize: '20m',
+            maxFiles: '14d'
+        }),
     ],
     rejectionHandlers: [
-        new winston.transports.File({ filename: logDir + 'rejections.log' })
+        // Transport for current logs:
+        new winston.transports.File({ filename: logDirCurrent + 'rejections.log' }),
+        // Transport for rotated logs:
+        new winston.transports.DailyRotateFile({
+            filename: logDirArchive + '%DATE%_rejections.log',
+            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            maxSize: '20m',
+            maxFiles: '14d'
+        }),
     ]
 });
 
