@@ -86,8 +86,8 @@ async function updateRoutine() {
     }
     // send email:
     const mailOptions = {
-        from: `essencefr-backend <${process.env.GIT_GMAIL_ADDR}>`, // sender address
-        to: process.env.ESSENCEFR_EMAIL_ADDR, // receiver email
+        from: `essencefr-backend <${config.get('gitEmailAddr')}>`, // sender address
+        to: config.get('ESSENCEFR_EMAIL_ADDR'), // receiver email
         subject: `Update Routine ${flagSuccess ? 'Success' : 'Failure'}`, // Subject line
         text: "Update routine done. Consult logs for more details.",
         attachments: [  // only non-empty files will be really sent

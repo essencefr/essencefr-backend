@@ -2,6 +2,7 @@
  * Module to send an email
  */
 
+const config = require('config');
 const nodemailer = require("nodemailer");
 
 // create reusable transporter object using the default SMTP transport
@@ -11,8 +12,8 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: process.env.GIT_GMAIL_ADDR,
-        pass: process.env.GIT_GMAIL_PWD,
+        user: config.get('gitEmailAddr'),
+        pass: config.get('gitEmailPwd'),
     },
 });
 

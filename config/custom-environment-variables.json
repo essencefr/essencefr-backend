@@ -1,4 +1,7 @@
 {
     "port": "PORT",
-    "dbConnectionString": "MONGODB_ESSENCEFR_CONSTR"
+    "dbConnectionString": "MONGODB_ESSENCEFR_CONSTR",
+    "gitEmailAddr": "GIT_GMAIL_ADDR",
+    "gitEmailPwd": "GIT_GMAIL_PWD",
+    "essencefrEmailAddr": "ESSENCEFR_EMAIL_ADDR"
 }
