@@ -19,6 +19,8 @@ if (!fs.existsSync(logDirArchive)) { fs.mkdirSync(logDirArchive) }
 // reset current log files:
 cleanFiles(logDirCurrent);
 
+const datePatternForRotate = 'YYYY-MM-DD';  // rotate every day
+
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -34,14 +36,14 @@ const logger = winston.createLogger({
         new winston.transports.DailyRotateFile({
             filename: logDirArchive + '%DATE%_error.log',
             level: 'error',
-            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            datePattern: datePatternForRotate,
             maxSize: '20m',
             maxFiles: '14d'
         }),
         new winston.transports.DailyRotateFile({
             filename: logDirArchive + '%DATE%_combined.log',
             level: 'info',
-            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            datePattern: datePatternForRotate,
             maxSize: '20m',
             maxFiles: '14d'
         }),
@@ -52,7 +54,7 @@ const logger = winston.createLogger({
         // Transport for rotated logs:
         new winston.transports.DailyRotateFile({
             filename: logDirArchive + '%DATE%_exceptions.log',
-            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            datePattern: datePatternForRotate,
             maxSize: '20m',
             maxFiles: '14d'
         }),
@@ -63,7 +65,7 @@ const logger = winston.createLogger({
         // Transport for rotated logs:
         new winston.transports.DailyRotateFile({
             filename: logDirArchive + '%DATE%_rejections.log',
-            datePattern: 'YYYY-MM-DD-HH-mm',  // rotate every minute
+            datePattern: datePatternForRotate,
             maxSize: '20m',
             maxFiles: '14d'
         }),

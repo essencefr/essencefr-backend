@@ -15,7 +15,7 @@ const { cleanFiles } = require("../../utils/files");
 
 // Cron job to automatically run the update function
 const updateJob = new CronJob(
-    '*/30 * * * * *',  // execute job every minute
+    '* * */2 * * *',  // execute job every two hour
     async () => {
         await updateRoutine();
     },
