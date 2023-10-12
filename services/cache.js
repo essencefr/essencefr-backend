@@ -50,6 +50,8 @@ class MyCache extends NodeCache {
     async getKnownStationIds() { return this.getKnownCollectionIds(this.keyKnownStationIds, Station); }
 
     pushInKnownStationIds(idList) { return this.pushInKnownCollectionIds(this.keyKnownStationIds, idList); }
+
+    clearKnownStationIds() { this.del(this.keyKnownStationIds); }
     
 }
 

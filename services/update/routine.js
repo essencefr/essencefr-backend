@@ -12,6 +12,7 @@ const { runInNewMongooseTransaction } = require("../../utils/transactions");
 const { updateStationsCollection } = require("./collections/stations");
 const { sendMail } = require("../../utils/email");
 const { cleanFiles } = require("../../utils/files");
+const cache = require("../cache");
 
 // Cron job to automatically run the update function
 const updateJob = new CronJob(
@@ -75,6 +76,7 @@ async function updateRoutine() {
     try {
         cleanFiles(config.get('logDirCurrent'));  // reset current log files
         const rawData = await fetchStations();
+        cache.clearKnownStationIds();  // clean cache to ensure correct filtering
         await executeAndLogPerformance('Process raw data', 'info', async () => {
             await processRawData(rawData);
         });
