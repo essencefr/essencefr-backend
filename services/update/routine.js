@@ -16,7 +16,13 @@ const cache = require("../cache");
 
 // Cron job to automatically run the update function
 const updateJob = new CronJob(
-    '0 0 */2 * * *',  // execute job every two hour
+    (() => {
+        if(process.env.NODE_ENV == 'test') {
+            return '*/30 * * * * *';  // execute the job twice per minute when server is started in test mode
+        } else {
+            return '0 0 */2 * * *';  // execute job every two hour
+        }
+    })(),
     async () => {
         await updateRoutine();
     },
@@ -78,7 +84,11 @@ async function updateRoutine() {
         const rawData = await fetchStations();
         cache.clearKnownStationIds();  // clean cache to ensure correct filtering
         await executeAndLogPerformance('Process raw data', 'info', async () => {
-            await processRawData(rawData);
+            if(process.env.NODE_ENV == 'test') {
+                await processRawData(rawData.slice(0, 20));  // only consider a subset of fetched stations when testing
+            } else {
+                await processRawData(rawData);
+            }
         });
     } catch (err) {
         logger.error(err);
@@ -87,7 +97,7 @@ async function updateRoutine() {
     // send email:
     const mailOptions = {
         from: `essencefr-backend <${config.get('gitEmailAddr')}>`, // sender address
-        to: config.get('ESSENCEFR_EMAIL_ADDR'), // receiver email
+        to: config.get('essencefrEmailAddr'), // receiver email
         subject: `Update Routine ${flagSuccess ? 'Success' : 'Failure'}`, // Subject line
         text: "Update routine done. Consult logs for more details.",
         attachments: [  // only non-empty files will be really sent
