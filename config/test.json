@@ -1,3 +1,5 @@
 {
-    "logDir": "./log_test/"
+    "logDir": "./log_test/",
+    "logDirArchive": "./log_test/archive/",
+    "logDirCurrent": "./log_test/current/"
 }
