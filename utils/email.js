@@ -15,6 +15,9 @@ const transporter = nodemailer.createTransport({
         user: config.get('gitEmailAddr'),
         pass: config.get('gitEmailPwd'),
     },
+    tls: {
+        rejectUnauthorized: false  // allow to use mailing services with invalid certificates
+    }
 });
 
 /** create reusable sendmail function 
