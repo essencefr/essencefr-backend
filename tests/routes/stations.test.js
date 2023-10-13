@@ -103,6 +103,20 @@ describe('/api/stations', () => {
                     expect(res.body.fuels[i].history).not.toBeUndefined();
                 }
             });
+
+            test('history fields should not include their \'_id\' value in the response body', async () => {
+                // define the raw data object:
+                const stationId = stationRawObjectList[0].id;
+                const stationObjectList = convertStationsFormat(stationRawObjectList);
+                await bulkWriteStationsCollection(stationObjectList, []);
+                // read database through api endpoint:
+                const res = await request(server).get(`/api/stations/${stationId}?history=true`);
+                // compare results:
+                expect(res.status).toBe(200);
+                for (let i=0; i<res.body.fuels.length; i++) {
+                    expect(res.body.fuels[i].history._id).toBeUndefined();
+                }
+            });
     
             test('a non-boolean value for \'history\' in query should return 400', async () => {
                 // perform requests:
