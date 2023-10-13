@@ -78,38 +78,40 @@ async function processRawData(stationRawObjectList, bunchSize = 200) {
  * So far it only updates one zone (development version)
  */
 async function updateRoutine() {
-    let flagSuccess = true;
-    try {
-        cleanFiles(config.get('logDirCurrent'));  // reset current log files
-        const rawData = await fetchStations();
-        cache.clearKnownStationIds();  // clean cache to ensure correct filtering
-        await executeAndLogPerformance('Process raw data', 'info', async () => {
-            if(process.env.NODE_ENV == 'test') {
-                await processRawData(rawData.slice(0, 20));  // only consider a subset of fetched stations when testing
-            } else {
-                await processRawData(rawData);
-            }
+    await executeAndLogPerformance('Update routine', 'info', async () => {        
+        let flagSuccess = true;
+        try {
+            cleanFiles(config.get('logDirCurrent'));  // reset current log files
+            const rawData = await fetchStations();
+            cache.clearKnownStationIds();  // clean cache to ensure correct filtering
+            await executeAndLogPerformance('Process raw data', 'info', async () => {
+                if(process.env.NODE_ENV == 'test') {
+                    await processRawData(rawData.slice(0, 20));  // only consider a subset of fetched stations when testing
+                } else {
+                    await processRawData(rawData);
+                }
+            });
+        } catch (err) {
+            logger.error(err);
+            flagSuccess = false;
+        }
+        // send email:
+        const mailOptions = {
+            from: `essencefr-backend <${config.get('gitEmailAddr')}>`, // sender address
+            to: config.get('essencefrEmailAddr'), // receiver email
+            subject: `Update Routine ${flagSuccess ? 'Success' : 'Failure'}`, // Subject line
+            text: "Update routine done. Consult logs for more details.",
+            attachments: [  // only non-empty files will be really sent
+                { filename: 'combined.log', path: './log/current/combined.log' },
+                { filename: 'error.log', path: './log/current/error.log' },
+                { filename: 'exceptions.log', path: './log/current/exceptions.log' },
+                { filename: 'rejections.log', path: './log/current/rejections.log' }
+            ]
+        }
+        sendMail(mailOptions, (info) => {
+            console.log("Email sent successfully");
+            console.log("MESSAGE ID: ", info.messageId);
         });
-    } catch (err) {
-        logger.error(err);
-        flagSuccess = false;
-    }
-    // send email:
-    const mailOptions = {
-        from: `essencefr-backend <${config.get('gitEmailAddr')}>`, // sender address
-        to: config.get('essencefrEmailAddr'), // receiver email
-        subject: `Update Routine ${flagSuccess ? 'Success' : 'Failure'}`, // Subject line
-        text: "Update routine done. Consult logs for more details.",
-        attachments: [  // only non-empty files will be really sent
-            { filename: 'combined.log', path: './log/current/combined.log' },
-            { filename: 'error.log', path: './log/current/error.log' },
-            { filename: 'exceptions.log', path: './log/current/exceptions.log' },
-            { filename: 'rejections.log', path: './log/current/rejections.log' }
-        ]
-    }
-    sendMail(mailOptions, (info) => {
-        console.log("Email sent successfully");
-        console.log("MESSAGE ID: ", info.messageId);
     });
 }
 
