@@ -21,9 +21,9 @@ router.get('/:id', async (req, res) => {
     // look for station:
     let station = null;
     if (req.query.history === 'true') {
-        station = await Station.findById(req.params.id).select('+fuels.history').lean();
+        station = await Station.findById(req.params.id).select('-fuels.history._id').lean();
     } else {
-        station = await Station.findById(req.params.id).lean();
+        station = await Station.findById(req.params.id).select('-fuels.history').lean();  // -> by default, do not return history path on query if not explicitly specified
     }
     if (!station) return res.status(404).send(`No station with id "${req.params.id}"`);
 
