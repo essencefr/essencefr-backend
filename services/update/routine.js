@@ -96,16 +96,17 @@ async function updateRoutine() {
             flagSuccess = false;
         }
         // send email:
+        const logDirCurrent = config.get('logDirCurrent');
         const mailOptions = {
             from: `essencefr-backend <${config.get('gitEmailAddr')}>`, // sender address
             to: config.get('essencefrEmailAddr'), // receiver email
             subject: `Update Routine ${flagSuccess ? 'Success' : 'Failure'}`, // Subject line
             text: "Update routine done. Consult logs for more details.",
             attachments: [  // only non-empty files will be really sent
-                { filename: 'combined.log', path: './log/current/combined.log' },
-                { filename: 'error.log', path: './log/current/error.log' },
-                { filename: 'exceptions.log', path: './log/current/exceptions.log' },
-                { filename: 'rejections.log', path: './log/current/rejections.log' }
+                { filename: 'combined.log', path: `${logDirCurrent}combined.log` },
+                { filename: 'error.log', path: `${logDirCurrent}error.log` },
+                { filename: 'exceptions.log', path: `${logDirCurrent}exceptions.log` },
+                { filename: 'rejections.log', path: `${logDirCurrent}rejections.log` }
             ]
         }
         sendMail(mailOptions, (info) => {
