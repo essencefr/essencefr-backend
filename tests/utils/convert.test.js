@@ -54,5 +54,21 @@ describe('convert features', () => {
                 expect(stationObjectList[i].coordinates.longitude).toEqual(stationRawObjectList[i].geom.lon);
             };
         });
+
+        test('ensure that dates converted match the dates retrieved from the gov api considering the timezone', () => {
+            const dateGazoleFromRaw = stationRawObjectList[0].gazole_maj;
+            const dateSP95FromRaw = stationRawObjectList[0].sp95_maj;
+            const dateSP98FromRaw = stationRawObjectList[0].sp98_maj;
+            const dateE10FromRaw = stationRawObjectList[0].e10_maj;
+            const dateE85FromRaw = stationRawObjectList[0].e85_maj;
+            const dateGPLcFromRaw = stationRawObjectList[0].gplc_maj;
+            const dictDatesFromId = {1: dateGazoleFromRaw, 2: dateSP95FromRaw, 3: dateE85FromRaw, 4: dateGPLcFromRaw, 5: dateE10FromRaw, 6: dateSP98FromRaw};
+            const stationObjectList = convertStationsFormat([stationRawObjectList[0]]);  // only consider the first sation object
+            for (fuel of stationObjectList[0].fuels) {
+                // by default (and because of the param 'timezone=Europe/Paris' in the api call) date are retrieved interpreted at Paris timezone
+                const dateStringUTC2 = new Date(fuel.date).toLocalDateString('fr-FR', { timeZone: 'Europe/Paris' });
+                expect(dateStringUTC2).toEqual(dictDatesFromId[fuel._id]);
+            }
+        }, 60000);  // set timeout to 1 min
     });
 });
