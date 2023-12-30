@@ -42,8 +42,7 @@ const Station = mongoose.model('Station', new mongoose.Schema({
                     date: { type: Date, required: true },
                     price: { type: Number, required: true }
                 }],
-                required: true,
-                select: false   // -> by default, do not return this path on query if not explicitly specified
+                required: true
             }
         }],
         required: true,

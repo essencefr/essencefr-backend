@@ -66,7 +66,7 @@ function convertStationFormat(stationRawObject) {
     let arrayFuels = [];
     listSupportedFuels.forEach(fuel => {
         if(stationRawObject[fuel.keyInRawData + '_prix'] != null) {
-            const fuelDate = new Date(stationRawObject[fuel.keyInRawData + '_maj'] + '+02:00');  // consider that data is already fetched with dates interpreted at UTC+2 (thus, mongoose will do the conversion to store them at UTC+0)
+            const fuelDate = new Date(stationRawObject[fuel.keyInRawData + '_maj']);  // even if the dates are fetched with the timezone of Europe/Paris, mongoose will do the conversion to store them at UTC+0
             const fuelPrice = stationRawObject[fuel.keyInRawData + '_prix'];
             arrayFuels.push({
                 _id: fuel._id,

@@ -42,6 +42,19 @@ describe('/api/stations', () => {
             expect(res.body.address.streetLine).toEqual(stationAddress);
         });
 
+        test('address and coordinates fields should not include their \'_id\' in the response body', async () => {
+            // define the raw data object:
+            const stationId = stationRawObjectList[0].id;
+            const stationObjectList = convertStationsFormat(stationRawObjectList);
+            await bulkWriteStationsCollection(stationObjectList, []);
+            // read database through api endpoint:
+            const res = await request(server).get(`/api/stations/${stationId}`);
+            // compare results:
+            expect(res.status).toBe(200);
+            expect(res.body.address._id).toBeUndefined();
+            expect(res.body.coordinates._id).toBeUndefined();
+        });
+
         test('history fields should not be returned in the response body by default', async () => {
             // define the raw data object:
             const stationId = stationRawObjectList[0].id;
@@ -101,6 +114,20 @@ describe('/api/stations', () => {
                 expect(res.status).toBe(200);
                 for (let i=0; i<res.body.fuels.length; i++) {
                     expect(res.body.fuels[i].history).not.toBeUndefined();
+                }
+            });
+
+            test('history fields should not include their \'_id\' value in the response body', async () => {
+                // define the raw data object:
+                const stationId = stationRawObjectList[0].id;
+                const stationObjectList = convertStationsFormat(stationRawObjectList);
+                await bulkWriteStationsCollection(stationObjectList, []);
+                // read database through api endpoint:
+                const res = await request(server).get(`/api/stations/${stationId}?history=true`);
+                // compare results:
+                expect(res.status).toBe(200);
+                for (let i=0; i<res.body.fuels.length; i++) {
+                    expect(res.body.fuels[i].history._id).toBeUndefined();
                 }
             });
     
