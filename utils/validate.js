@@ -17,9 +17,9 @@ function validateStationRaw(jsonData) {
             lon: Joi.number().required(),
         }),
 
-        adresse: Joi.string().required(),
+        adresse: Joi.string().allow(null).required(),
         ville: Joi.string().allow(null).required(),
-        cp: Joi.string().required(),
+        cp: Joi.string().allow(null).required(),
 
         gazole_maj: Joi.string().allow(null).required(),
         gazole_prix: Joi.string().allow(null).required(),

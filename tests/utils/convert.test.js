@@ -55,6 +55,18 @@ describe('convert features', () => {
             };
         });
 
+        test('a \'null\' value for \'adresse\', \'ville\' or \'cp\' should not throw', () => {
+            let stationRawObjectListWithNullValues = JSON.parse(JSON.stringify(stationRawObjectList));
+            stationRawObjectListWithNullValues[0].address = null;
+            stationRawObjectListWithNullValues[0].ville = null;
+            stationRawObjectListWithNullValues[0].cp = null;
+            const stationObjectListWithNullValues = convertStationsFormat(stationRawObjectListWithNullValues);
+            stationObjectListWithNullValues.forEach(async (stationObject) => {
+                const doc = Station.hydrate(stationObject);
+                await expect(doc.validate()).resolves.toBeUndefined();
+            });
+        });
+
         test('ensure that dates converted match the dates retrieved from the gov api considering the timezone', () => {
             const dateGazoleFromRaw = stationRawObjectList[0].gazole_maj;
             const dateSP95FromRaw = stationRawObjectList[0].sp95_maj;
