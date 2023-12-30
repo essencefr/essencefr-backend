@@ -18,10 +18,10 @@ describe('save/update history feature', () => {
         connectToDB();
         await clearCollections();
     });
-    afterEach(async () => {
-        await clearCollections();
-        cache.flushAll();
-    });
+    // afterEach(async () => {
+    //     await clearCollections();
+    //     cache.flushAll();
+    // });
     afterAll(async () => {
         await mongoose.disconnect();
     });
