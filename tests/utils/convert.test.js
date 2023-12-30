@@ -54,5 +54,17 @@ describe('convert features', () => {
                 expect(stationObjectList[i].coordinates.longitude).toEqual(stationRawObjectList[i].geom.lon);
             };
         });
+
+        test('a \'null\' value for \'adresse\', \'ville\' or \'cp\' should not throw', () => {
+            let stationRawObjectListWithNullValues = JSON.parse(JSON.stringify(stationRawObjectList));
+            stationRawObjectListWithNullValues[0].address = null;
+            stationRawObjectListWithNullValues[0].ville = null;
+            stationRawObjectListWithNullValues[0].cp = null;
+            const stationObjectListWithNullValues = convertStationsFormat(stationRawObjectListWithNullValues);
+            stationObjectListWithNullValues.forEach(async (stationObject) => {
+                const doc = Station.hydrate(stationObject);
+                await expect(doc.validate()).resolves.toBeUndefined();
+            });
+        });
     });
 });
