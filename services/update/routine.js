@@ -20,7 +20,7 @@ const updateJob = new CronJob(
         if(process.env.NODE_ENV == 'test') {
             return '*/30 * * * * *';  // execute the job twice per minute when server is started in test mode
         } else {
-            return '0 0 */2 * * *';  // execute job every two hour
+            return '0 0 */6 * * *';  // execute job every six hours
         }
     })(),
     async () => {
